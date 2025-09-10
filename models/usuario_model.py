@@ -7,8 +7,11 @@ def cadastrar_usuario(dados):
     senha = generate_password_hash(dados['senha'])
 
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)",
-                   (nome, email, senha))
+    cursor.execute(
+        "INSERT INTO usuarios (nome, email, senha) VALUES (%s, %s, %s)",
+        (nome, email, senha)
+    )
     mysql.connection.commit()
     cursor.close()
+
     return {"mensagem": "Usuário cadastrado com sucesso"}
