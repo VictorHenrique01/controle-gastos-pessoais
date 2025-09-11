@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  # Serviço da API (sua aplicação Flask)
+  api:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - mysql
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://root:cavadinha@mysql:3306/controle_gastos
+    # Comando de inicialização:
+    # 1. Espera 5 segundos para o MySQL iniciar
+    # 2. Roda o script de criação de tabelas
+    # 3. Inicia o Gunicorn
+    command: sh -c "sleep 5 && python db.py && gunicorn --bind 0.0.0.0:5000 app:app"
+
+  # Serviço do banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cavadinha
+      MYSQL_DATABASE: controle_gastos
+    volumes:
+      - ./mysql-data:/var/lib/mysql
