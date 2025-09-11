@@ -1,3 +1,6 @@
 Flask
-Flask-MySQLdb
+Flask-SQLAlchemy
+PyMySQL
 Werkzeug
+gunicorn
+cryptography
