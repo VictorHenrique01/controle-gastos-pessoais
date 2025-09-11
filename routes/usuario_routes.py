@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from models.usuario_model import cadastrar_usuario
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -8,3 +8,7 @@ def criar_usuario():
     dados = request.get_json()
     resultado = cadastrar_usuario(dados)
     return jsonify(resultado)
+
+@usuario_bp.route("/cadastro", methods=["GET"])
+def pagina_cadastro():
+    return render_template("cadastro_usuario.html")
