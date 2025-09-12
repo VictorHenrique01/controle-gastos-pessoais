@@ -4,3 +4,4 @@ PyMySQL
 Werkzeug
 gunicorn
 cryptography
+flask-bcrypt

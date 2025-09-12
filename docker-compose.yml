@@ -1,22 +1,20 @@
 version: "3.8"
 
 services:
-  # Serviço da API (sua aplicação Flask)
+  
   api:
     build: .
     ports:
       - "5000:5000"
     volumes:
       - .:/app
+    # 'depends_on' agora espera o mysql iniciar
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       SQLALCHEMY_DATABASE_URI: mysql+pymysql://root:cavadinha@mysql:3306/controle_gastos
-    # Comando de inicialização:
-    # 1. Espera 5 segundos para o MySQL iniciar
-    # 2. Roda o script de criação de tabelas
-    # 3. Inicia o Gunicorn
-    command: sh -c "sleep 5 && python db.py && gunicorn --bind 0.0.0.0:5000 app:app"
+    command: sh -c "python db.py && gunicorn --bind 0.0.0.0:5000 app:app"
 
   # Serviço do banco de dados MySQL
   mysql:
@@ -27,3 +25,9 @@ services:
       MYSQL_DATABASE: controle_gastos
     volumes:
       - ./mysql-data:/var/lib/mysql
+    # O bloco de healthcheck para verificar se o MySQL está pronto
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

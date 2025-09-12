@@ -1,1 +1,16 @@
-venv
+# Dados do Banco de Dados Docker
+mysql-data/
+
+# Arquivos de Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de ambiente (contém senhas!)
+.env
+
+# Diretórios de ambiente virtual do Python
+venv/
+.venv/
+env/

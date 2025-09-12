@@ -1,8 +1,10 @@
 from flask import Flask
 from routes.usuario_routes import usuario_bp
-from config import init_app,db
+from config import init_app, db
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = 'cavadinha'
 
 # Inicializar banco
 init_app(app)
