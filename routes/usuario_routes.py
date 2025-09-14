@@ -18,33 +18,25 @@ def listar_usuarios():
 #def pagina_cadastro():
 #    return render_template("cadastro_usuario.html")
 
-
 # ROTA DE LOGIN
 @usuario_bp.route("/login", methods=["GET", "POST"])
 def login():
-    # Se o método for POST, o usuário enviou o formulário
+
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
 
-        # Busca o usuário no banco de dados pelo email
         usuario = obter_usuario_por_email(email)
 
-        # Verifica se o usuário existe e se a senha está correta
-        # Usamos a função 'verificar_senha' que criamos no modelo
         if usuario and usuario.verificar_senha(senha):
-            # Se deu tudo certo, salvamos o ID do usuário na sessão
             session['user_id'] = usuario.id
             session['user_name'] = usuario.nome
             flash(f'Bem-vindo(a) de volta, {usuario.nome}!', 'success')
-            # Redireciona para uma página principal (crie uma depois)
-            return redirect(url_for('usuario.pagina_cadastro')) # Mude para uma rota de dashboard/home
+            return redirect(url_for('usuario.pagina_cadastro')) 
         else:
-            # Se as credenciais estiverem erradas, exibe uma mensagem de erro
             flash('Email ou senha inválidos. Tente novamente.', 'danger')
             return redirect(url_for('usuario.login'))
 
-    # Se o método for GET, apenas exibe a página de login
     return render_template("login.html")
 
 

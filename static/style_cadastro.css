@@ -1,4 +1,4 @@
-/* Reset bsc */
+/* reset bsc */
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +6,6 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Fundo */
 body {
     background: #f4f7fb;
     display: flex;
@@ -15,7 +14,7 @@ body {
     height: 100vh;
 }
 
-/* Card de cadastro */
+/* card cadastro */
 .container {
     background: #fff;
     padding: 30px 40px;
@@ -25,14 +24,14 @@ body {
     max-width: 400px;
 }
 
-/* Titulo */
+/* titulo */
 .container h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
 }
 
-/* Inputs */
+/* inputs */
 .form-group {
     margin-bottom: 15px;
 }
@@ -58,7 +57,6 @@ body {
     box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.3);
 }
 
-/* Botão */
 button {
     width: 100%;
     padding: 12px;
