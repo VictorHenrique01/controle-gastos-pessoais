@@ -1,3 +1,4 @@
+/* TENTEI E DEU ERRO kkkk */  
 const API_URL = `${window.location.origin}`;
 document.getElementById("formCadastro").addEventListener("submit", async function (e) {
     e.preventDefault();
