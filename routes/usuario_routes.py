@@ -18,33 +18,24 @@ def listar_usuarios():
 #def pagina_cadastro():
 #    return render_template("cadastro_usuario.html")
 
-# ROTA DE LOGIN
-@usuario_bp.route("/login", methods=["GET", "POST"])
+@usuario_bp.route("/login", methods=["POST"])
 def login():
+    dados = request.get_json()
+    email = dados.get("email")
+    senha = dados.get("senha")
 
-    if request.method == 'POST':
-        email = request.form.get('email')
-        senha = request.form.get('senha')
+    usuario = obter_usuario_por_email(email)
 
-        usuario = obter_usuario_por_email(email)
-
-        if usuario and usuario.verificar_senha(senha):
-            session['user_id'] = usuario.id
-            session['user_name'] = usuario.nome
-            flash(f'Bem-vindo(a) de volta, {usuario.nome}!', 'success')
-            return redirect(url_for('usuario.pagina_cadastro')) 
-        else:
-            flash('Email ou senha inválidos. Tente novamente.', 'danger')
-            return redirect(url_for('usuario.login'))
-
-    return render_template("login.html")
+    if usuario and usuario.verificar_senha(senha):
+        session["usuario_id"] = usuario.id  # guarda o id do usuário na sessão
+        session["usuario_nome"] = usuario.nome
+        return jsonify({"mensagem": "Login realizado com sucesso", "usuario": {"id": usuario.id, "nome": usuario.nome}})
+    else:
+        return jsonify({"erro": "Email ou senha incorretos"}), 401
 
 
-# ROTA DE LOGOUT
-@usuario_bp.route('/logout')
+
+@usuario_bp.route("/logout", methods=["POST"])
 def logout():
-    # Remove os dados da sessão
-    session.pop('user_id', None)
-    session.pop('user_name', None)
-    flash('Você saiu da sua conta.', 'info')
-    return redirect(url_for('usuario.login'))
+    session.clear()
+    return jsonify({"mensagem": "Logout realizado com sucesso"})
