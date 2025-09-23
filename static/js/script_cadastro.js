@@ -22,7 +22,10 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
         });
 
         if (!resposta.ok) {
-            throw new Error(`Erro HTTP: ${resposta.status}`);
+            // Tenta ler a mensagem de erro do corpo da resposta, se houver
+            const erroData = await resposta.json().catch(() => null);
+            const msgErro = erroData ? erroData.erro : `Erro HTTP: ${resposta.status}`;
+            throw new Error(msgErro);
         }
 
         const resultado = await resposta.json();
@@ -31,14 +34,22 @@ document.getElementById("formCadastro").addEventListener("submit", async functio
             mensagem.textContent = resultado.erro;
             mensagem.style.color = "red";
         } else {
+            // 1. Exibe a mensagem de sucesso
             mensagem.textContent = resultado.mensagem;
             mensagem.style.color = "green";
+            
+            // 2. Limpa o formulário
             document.getElementById("formCadastro").reset();
+
+            // 3. Aguarda 2 segundos e redireciona o usuário para a página de login
+            setTimeout(() => {
+                window.location.href = "/usuarios/login";
+            }, 2000); // 2000 milissegundos = 2 segundos
         }
 
     } catch (erro) {
         console.error("Erro:", erro);
-        mensagem.textContent = "Erro ao cadastrar usuário!";
+        mensagem.textContent = erro.message || "Erro ao cadastrar usuário!";
         mensagem.style.color = "red";
     }
 });
