@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Despesa</title>
+    <link rel="stylesheet" href="/static/despesa.css">
+</head>
+<body>
+    <div class="hero">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="texto">
+                <h1>Controle suas Despesas</h1>
+                <p>Organize suas finanças pessoais de forma simples e rápida</p>
+            </div>
+
+            <div class="form-box">
+                <h2>Registrar Despesa</h2>
+                <form id="form-despesa">
+                    <label for="categoria">Categoria:</label>
+                    <select id="categoria" name="categoria" required>
+                        <option value="">Selecione</option>
+                        <option value="alimentacao">Alimentação</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="outros">Outros</option>
+                    </select>
+
+                    <label for="valor">Valor:</label>
+                    <input type="number" id="valor" name="valor" placeholder="Ex: 150.00" required>
+
+                    <label for="descricao">Descrição:</label>
+                    <input type="text" id="descricao" name="descricao" placeholder="Ex: Conta de luz">
+
+                    <label for="data">Data:</label>
+                    <input type="date" id="data" name="data" required>
+
+                    <button type="submit">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de despesas -->
+    <section class="despesas">
+        <h2>Minhas Despesas</h2>
+        <p id="mensagem-vazia">Suas despesas registradas aparecerão aqui.</p>
+
+        <table id="tabela-despesas">
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Descrição</th>
+                    <th>Valor (R$)</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Registros vão aparecer aq via JS -->
+            </tbody>
+        </table>
+    </section>
+    <script src="/static/js/despesas.js"></script>
+</body>
+</html>
