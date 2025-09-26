@@ -1,5 +1,7 @@
 from config import db
 from werkzeug.security import generate_password_hash, check_password_hash
+# A importação do Despesa aqui é necessária apenas para o type hinting (opcional, mas bom)
+from models.despesa_model import Despesa 
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
@@ -7,6 +9,9 @@ class Usuario(db.Model):
     nome = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     senha = db.Column(db.String(255), nullable=False)
+
+
+    despesas = db.relationship('Despesa', back_populates='usuario', cascade="all, delete-orphan")
 
     def verificar_senha(self, senha_para_verificar):
         return check_password_hash(self.senha, senha_para_verificar)

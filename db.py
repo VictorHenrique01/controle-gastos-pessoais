@@ -1,6 +1,7 @@
 from app import app
 from config import db
 from models.usuario_model import Usuario
+from models.despesa_model import Despesa
 
 def create_tables():
     with app.app_context():
