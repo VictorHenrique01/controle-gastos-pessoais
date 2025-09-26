@@ -56,3 +56,7 @@ def obter_despesas_por_usuario(usuario_id):
     """Busca todas as despesas de um usuário específico."""
     despesas = Despesa.query.filter_by(usuario_id=usuario_id).order_by(Despesa.data.desc()).all()
     return [d.to_dict() for d in despesas]
+
+def obter_despesa_por_id(despesa_id, usuario_id):
+
+    return Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
