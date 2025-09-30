@@ -1,4 +1,4 @@
-from config import db
+from db import db
 from werkzeug.security import generate_password_hash, check_password_hash
 # A importação do Despesa aqui é necessária apenas para o type hinting (opcional, mas bom)
 from models.despesa_model import Despesa 

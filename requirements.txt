@@ -1,7 +1,7 @@
 Flask
 Flask-SQLAlchemy
 PyMySQL
-Werkzeug
 gunicorn
+werkzeug
+Flask-Migrate
 cryptography
-flask-bcrypt

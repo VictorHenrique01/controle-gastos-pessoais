@@ -1,51 +1,48 @@
 # docker-compose.yml
-
-version: "3.8"
 services:
-  
   api:
     build: .
     ports:
       - "5000:5000"
     volumes:
       - .:/app
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://root:cavadinha@mysql:3306/controle_gastos
+      FLASK_APP: app.py
     depends_on:
       mysql:
         condition: service_healthy
-    environment:
-      SQLALCHEMY_DATABASE_URI: mysql+pymysql://root:cavadinha@mysql:3306/controle_gastos
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...'
-        python -c \"
-      import socket
-      import time
+        echo 'Aguardando o banco de dados...' &&
+        python -c 'import socket; import time;
       while True:
         try:
-          with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('mysql', 3306))
-          break
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
+          s.connect((\"mysql\", 3306));
+          s.close();
+          break;
         except socket.error as ex:
-          print('Database not ready yet, retrying...')
-          time.sleep(1)
-      \"
-        echo 'Database is ready! Starting application...'
-        python db.py && gunicorn --bind 0.0.0.0:5000 app:app
+          time.sleep(1)' &&
+        echo 'Banco de dados pronto!' &&
+        echo 'Aplicando migrações do banco de dados...' &&
+        flask db upgrade &&
+        echo 'Iniciando o servidor Gunicorn...' &&
+        gunicorn --bind 0.0.0.0:5000 \"app:create_app()\"
       "
 
   mysql:
-      image: mysql:8.0
-      restart: always
-      environment:
-        MYSQL_ROOT_PASSWORD: cavadinha
-        MYSQL_DATABASE: controle_gastos
-      
-      ports:
-        - "3306:3306" 
-      volumes:
-        - ./mysql-data:/var/lib/mysql
-      healthcheck:
-        test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cavadinha
+      MYSQL_DATABASE: controle_gastos
+    ports:
+      - "3306:3306" 
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

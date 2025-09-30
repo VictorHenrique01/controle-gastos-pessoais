@@ -5,30 +5,24 @@ despesa_bp = Blueprint("despesas", __name__)
 
 @despesa_bp.route("/", methods=["POST"])
 def criar_despesa():
-    # 1. Verificar se o usuário está logado
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
 
-    # 2. Obter os dados da requisição
     dados = request.get_json()
-    usuario_id = session["usuario_id"]
-
-    # 3. Validar os dados recebidos
-    campos_obrigatorios = ["descricao", "valor", "categoria"]
-    if not all(campo in dados for campo in campos_obrigatorios):
-        return jsonify({"erro": "Campos obrigatórios ausentes"}), 400
+    
+    campos_obrigatorios = ["descricao", "valor", "categoria", "data"]
+    if not all(campo in dados and dados[campo] for campo in campos_obrigatorios):
+        return jsonify({"erro": "Todos os campos são obrigatórios."}), 400
         
-    # Validar se a categoria é uma das opções válidas
     try:
-        CategoriaDespesa(dados['categoria'])
-    except ValueError:
+        CategoriaDespesa[dados['categoria']]
+    except KeyError:
         return jsonify({"erro": f"Categoria '{dados['categoria']}' inválida."}), 400
 
-    # 4. Adicionar o ID do usuário aos dados e salvar
-    dados["usuario_id"] = usuario_id
+    dados["usuario_id"] = session["usuario_id"]
     nova_despesa = adicionar_despesa(dados)
     
-    return jsonify(nova_despesa), 201 # 201 Created
+    return jsonify(nova_despesa), 201
 
 @despesa_bp.route("/", methods=["GET"])
 def listar_despesas_usuario():
