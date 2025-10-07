@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Despesa</title>
+    <title>Controle de Despesas</title>
     <link rel="stylesheet" href="/static/despesa.css">
 </head>
 <body>
@@ -15,6 +15,28 @@
             </div>
 
             <div class="form-box">
+                <!-- NOVA SEÇÃO: DEFINIR ORÇAMENTO MENSAL -->
+                <section class="orcamento-section">
+                    <h2>Definir Orçamento Mensal</h2>
+                    <p>Informe o valor máximo que deseja gastar neste mês.</p>
+
+                    <div class="orcamento-input">
+                        <label for="orcamento">Orçamento (R$):</label>
+                        <input type="number" id="orcamento" placeholder="Ex: 2000" />
+                        <button id="salvarOrcamento">Confirmar</button>
+                    </div>
+
+                    <div class="orcamento-status">
+                        <p><strong>Orçamento Atual:</strong> R$ <span id="valorOrcamento">0.00</span></p>
+                        <p><strong>Total de Despesas:</strong> R$ <span id="totalDespesas">0.00</span></p>
+
+                        <div class="barra-progresso">
+                            <div id="progresso"></div>
+                        </div>
+                        <p id="percentualGasto">0% do orçamento utilizado</p>
+                    </div>
+                </section>
+
                 <h2>Registrar Despesa</h2>
                 <form id="form-despesa">
                     <label for="categoria">Categoria:</label>
@@ -37,18 +59,18 @@
                     <input type="date" id="data" name="data" required>
 
                     <button type="submit">Salvar</button>
-                </form>         
-            </div>   
+                </form>
+            </div>
         </div>
     </div>
 
     <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 150">
-    <path fill="#ffffff" fill-opacity="1" 
-        d="M0,96L80,101.3C160,107,320,117,480,112C640,107,800,85,960,80C1120,75,1280,85,1360,90L1440,96V150H0Z">
-    </path>
+        <path fill="#ffffff" fill-opacity="1" 
+            d="M0,96L80,101.3C160,107,320,117,480,112C640,107,800,85,960,80C1120,75,1280,85,1360,90L1440,96V150H0Z">
+        </path>
     </svg>
 
-    <!-- section de despesas -->
+    <!-- TABELA DE DESPESAS -->
     <section class="despesas">
         <h2>Minhas Despesas</h2>
         <p id="mensagem-vazia">Suas despesas registradas aparecerão aqui.</p>
@@ -63,10 +85,18 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- resgistros vão aparecer aq via JS -->
+                <!-- Registros via JS -->
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Total:</strong></td>
+                    <td id="valorTotalTabela"><strong>R$ 0,00</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     </section>
+
     <script src="/static/js/despesas.js"></script>
 </body>
 </html>
