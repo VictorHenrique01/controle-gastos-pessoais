@@ -28,7 +28,7 @@ services:
         echo 'Aplicando migrações do banco de dados...' &&
         flask db upgrade &&
         echo 'Iniciando o servidor Gunicorn...' &&
-        gunicorn --bind 0.0.0.0:5000 \"app:create_app()\"
+        gunicorn --bind 0.0.0.0:5000 \"app:create_app()\" 
       "
 
   mysql:
@@ -38,7 +38,7 @@ services:
       MYSQL_ROOT_PASSWORD: cavadinha
       MYSQL_DATABASE: controle_gastos
     ports:
-      - "3306:3306" 
+      - "3307:3306"  # 🔁 Porta externa alterada para 3307
     volumes:
       - ./mysql-data:/var/lib/mysql
     healthcheck:

@@ -12,6 +12,8 @@ class Usuario(db.Model):
 
 
     despesas = db.relationship('Despesa', back_populates='usuario', cascade="all, delete-orphan")
+    orcamentos = db.relationship('Orcamento', back_populates='usuario', cascade="all, delete-orphan")
+
 
     def verificar_senha(self, senha_para_verificar):
         return check_password_hash(self.senha, senha_para_verificar)
