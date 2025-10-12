@@ -21,7 +21,7 @@ def create_app():
     
     app.register_blueprint(usuario_bp, url_prefix="/usuarios")
     app.register_blueprint(despesa_bp, url_prefix="/despesas")
-    app.register_blueprint(orcamento_bp, url_prefix="/orcamento")  
+    app.register_blueprint(orcamento_bp, url_prefix="/orcamentos")  
 
     @app.route("/")
     def index():

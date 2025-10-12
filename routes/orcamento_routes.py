@@ -1,22 +1,37 @@
-from flask import Blueprint, request, jsonify
+# routes/orcamento_routes.py
+from flask import Blueprint, request, jsonify, session
 from models.orcamento_model import definir_orcamento, obter_orcamento
 
-orcamento_bp = Blueprint('orcamento', __name__)
+# Mude o nome do blueprint e o prefixo da URL para o PLURAL, para corresponder ao JS
+orcamento_bp = Blueprint('orcamentos', __name__)
 
-@orcamento_bp.route('/orcamento', methods=['POST'])
+# A rota POST agora responderá em "/" (que, com o prefixo, se torna "/orcamentos/")
+@orcamento_bp.route('/', methods=['POST'])
 def rota_definir_orcamento():
+    # 1. Obter o ID do usuário da SESSÃO (MUITO MAIS SEGURO)
+    if "usuario_id" not in session:
+        return jsonify({"erro": "Acesso não autorizado"}), 401
+    usuario_id = session["usuario_id"]
+    
     dados = request.get_json()
-    usuario_id = dados.get('usuario_id')
     valor = dados.get('valor')
 
-    if not usuario_id or not valor:
-        return jsonify({"erro": "Campos obrigatórios ausentes"}), 400
+    if valor is None:
+        return jsonify({"erro": "O campo 'valor' é obrigatório"}), 400
 
     resultado = definir_orcamento(usuario_id, valor)
     return jsonify(resultado), 200
 
 
-@orcamento_bp.route('/orcamento/<int:usuario_id>', methods=['GET'])
-def rota_obter_orcamento(usuario_id):
+# A rota GET também responderá em "/" e usará a SESSÃO
+@orcamento_bp.route('/', methods=['GET'])
+def rota_obter_orcamento():
+    # 1. Obter o ID do usuário da SESSÃO
+    if "usuario_id" not in session:
+        return jsonify({"erro": "Acesso não autorizado"}), 401
+    usuario_id = session["usuario_id"]
+
     resultado = obter_orcamento(usuario_id)
-    return jsonify(resultado), 200
+    
+    # O JS espera um objeto com a chave "valor", vamos ajustar a resposta
+    return jsonify({"valor": resultado.get("orcamento", 0.0)}), 200
