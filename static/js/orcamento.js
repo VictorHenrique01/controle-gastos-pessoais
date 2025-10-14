@@ -51,18 +51,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Busca o total de despesas atual na API
     const buscarTotalDespesas = async () => {
-        try {
-            const response = await fetch('/despesas/');
-            if (!response.ok) {
-                throw new Error('Erro ao buscar despesas.');
-            }
-            const despesas = await response.json();
-            totalDespesas = despesas.reduce((soma, item) => soma + parseFloat(item.valor), 0);
-            atualizarStatus();
-        } catch (error) {
-            console.error('Erro ao calcular total de despesas:', error);
+    try {
+        const response = await fetch('/despesas/');
+        if (!response.ok) {
+            throw new Error('Erro ao buscar despesas.');
         }
-    };
+        const despesas = await response.json();
+        totalDespesas = despesas.reduce((soma, item) => soma + parseFloat(item.valor), 0);
+
+        // Pega o elemento do rodapé da tabela pelo ID
+        const valorTotalTabela = document.getElementById("valorTotalTabela");
+
+        // Atualiza o HTML com o valor total formatado
+        valorTotalTabela.innerHTML = `<strong>R$ ${totalDespesas.toFixed(2).replace('.', ',')}</strong>`;
+
+        atualizarStatus();
+    } catch (error) {
+        console.error('Erro ao calcular total de despesas:', error);
+    }
+};
 
     // Envia orçamento definido pelo usuário para a API
     const salvarOrcamento = async () => {
