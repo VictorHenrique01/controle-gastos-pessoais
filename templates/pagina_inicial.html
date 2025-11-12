@@ -10,7 +10,7 @@
     <div class="container">
         <!-- img -->
         <div class="image-side">
-            <img src="/src/finance.png" alt="Controle de Gastos">
+            <img src="/image/finance.png" alt="Controle de Gastos">
         </div>
 
         <!-- conteúdo -->
@@ -22,8 +22,24 @@
                 <a href="/templates/cadastro_usuario.html" class="btn btn-primary">Cadastrar-se</a>
                 <a href="/templates/login.html" class="btn btn-secondary">Entrar</a>
             </div>
+
+            <!-- botão que aparece após login -->
+            <div id="controle-despesas-wrapper" style="display: none;">
+                <a href="/templates/despesas.html" class="btn-controlar-despesas">Controlar Despesas</a>
+            </div>
         </div>
     </div>
-    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const wrapper = document.getElementById("controle-despesas-wrapper");
+            const logado = localStorage.getItem("usuarioLogado") === "true";
+
+            // mostra o botão se o usuário estiver logado
+            if (logado) {
+                wrapper.style.display = "block";
+            }
+        });
+    </script>
 </body>
 </html>

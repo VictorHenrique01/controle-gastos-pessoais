@@ -6,6 +6,12 @@
     <link rel="stylesheet" href="/static/despesa.css">
 </head>
 <body>
+    <!-- BOTÃO DE PERFIL/LOGOUT -->
+    <div class="user-controls">
+        <img src="/image/perfil-icon.svg" alt="Perfil" class="profile-icon">
+        <button id="btnLogout" class="btn-logout">Sair</button>
+    </div>
+
     <div class="hero">
         <div class="overlay"></div>
         <div class="content">
@@ -70,27 +76,26 @@
         </path>
     </svg>
 
-     <!-- FILTRO E BUSCA -->
-<section class="filtros">
-    <h3>Filtrar e Buscar Despesas</h3>
+    <!-- FILTRO E BUSCA -->
+    <section class="filtros">
+        <h3>Filtrar e Buscar Despesas</h3>
 
-    <div class="filtro-container">
-        <input type="text" id="buscaDescricao" placeholder="Buscar por descrição..." />
+        <div class="filtro-container">
+            <input type="text" id="buscaDescricao" placeholder="Buscar por descrição..." />
 
-        <select id="filtroCategoria">
-            <option value="">Todas as categorias</option>
-            <option value="alimentacao">Alimentação</option>
-            <option value="transporte">Transporte</option>
-            <option value="lazer">Lazer</option>
-            <option value="moradia">Moradia</option>
-            <option value="outros">Outros</option>
-        </select>
+            <select id="filtroCategoria">
+                <option value="">Todas as categorias</option>
+                <option value="alimentacao">Alimentação</option>
+                <option value="transporte">Transporte</option>
+                <option value="lazer">Lazer</option>
+                <option value="moradia">Moradia</option>
+                <option value="outros">Outros</option>
+            </select>
 
-        <input type="month" id="filtroMes" />
-        <button id="limparFiltros">Limpar</button>
-    </div>
-</section>
-
+            <input type="month" id="filtroMes" />
+            <button id="limparFiltros">Limpar</button>
+        </div>
+    </section>
 
     <!-- TABELA DE DESPESAS -->
     <section class="despesas">
@@ -119,9 +124,16 @@
         </table>
     </section>
 
-
     <script src="/static/js/despesas.js"></script>
     <script src="/static/js/orcamento.js"></script>
+
+    <!-- SCRIPT DO BOTÃO LOGOUT -->
+    <script>
+        document.getElementById("btnLogout").addEventListener("click", () => {
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "/templates/pagina_inicial.html";
+        });
+    </script>
 
 </body>
 </html>

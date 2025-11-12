@@ -92,3 +92,29 @@ body {
 .btn-secondary:hover {
     background: #f0f7ff;
 }
+
+/* Botão Controlar Despesas */
+.btn-controlar-despesas {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 26px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #4a90e2;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(74, 144, 226, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-controlar-despesas:hover {
+    background-color: #3b7fd1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
+}
+
+.btn-controlar-despesas:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+}
