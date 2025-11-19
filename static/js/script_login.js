@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Redireciona o usuário para a página principal após 1 segundo
                 setTimeout(() => {
-                    window.location.href = "/templates/pagina_inicial.html";
+                    window.location.href = "/pagina_inicial";
                 }, 1000);
 
             } else {

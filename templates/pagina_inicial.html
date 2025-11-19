@@ -8,38 +8,26 @@
 </head>
 <body>
     <div class="container">
-        <!-- img -->
         <div class="image-side">
-            <img src="/image/finance.png" alt="Controle de Gastos">
+            <img src="/static/img/finance.png" alt="Controle de Gastos">
         </div>
 
-        <!-- conteúdo -->
         <div class="content-side">
             <h1>Controle de Gastos</h1>
             <p>Organize seu dinheiro, conquiste seus objetivos.</p>
 
             <div class="buttons">
-                <a href="/templates/cadastro_usuario.html" class="btn btn-primary">Cadastrar-se</a>
-                <a href="/templates/login.html" class="btn btn-secondary">Entrar</a>
+                <a href="/usuarios/cadastro" class="btn btn-primary">Cadastrar-se</a>
+                
+                <a href="/usuarios/login" class="btn btn-secondary">Entrar</a>
             </div>
 
-            <!-- botão que aparece após login -->
-            <div id="controle-despesas-wrapper" style="display: none;">
-                <a href="/templates/despesas.html" class="btn-controlar-despesas">Controlar Despesas</a>
+            {% if session.get('usuario_id') %}
+            <div id="controle-despesas-wrapper">
+                <a href="/pagina_inicial" class="btn-controlar-despesas">Controlar Despesas</a>
             </div>
+            {% endif %}
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const wrapper = document.getElementById("controle-despesas-wrapper");
-            const logado = localStorage.getItem("usuarioLogado") === "true";
-
-            // mostra o botão se o usuário estiver logado
-            if (logado) {
-                wrapper.style.display = "block";
-            }
-        });
-    </script>
 </body>
 </html>
