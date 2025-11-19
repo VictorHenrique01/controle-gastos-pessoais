@@ -59,3 +59,39 @@ def obter_despesas_por_usuario(usuario_id):
 def obter_despesa_por_id(despesa_id, usuario_id):
     # Garante que a despesa pertence ao usuário logado
     return Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
+
+def atualizar_despesa(despesa_id, usuario_id, dados):
+    # Busca a despesa garantindo que pertence ao usuário
+    despesa = Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
+
+    if not despesa:
+        return None
+
+    # Atualiza apenas os campos enviados
+    if "descricao" in dados:
+        despesa.descricao = dados["descricao"]
+
+    if "valor" in dados:
+        despesa.valor = float(dados["valor"])
+
+    if "data" in dados:
+        despesa.data = datetime.strptime(dados["data"], "%Y-%m-%d").date()
+
+    if "categoria" in dados:
+        # Converte string para enum corretamente
+        despesa.categoria = CategoriaDespesa[dados["categoria"]]
+
+    db.session.commit()
+    return despesa
+
+
+def remover_despesa(despesa_id, usuario_id):
+    # Busca garantindo que a despesa pertence ao usuário
+    despesa = Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
+
+    if not despesa:
+        return False
+
+    db.session.delete(despesa)
+    db.session.commit()
+    return True

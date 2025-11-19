@@ -1,0 +1,56 @@
+/* /static/despesa2.css */
+
+/* Ações - botões editar/excluir */
+.btn-acao {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  margin: 0 4px;
+  border-radius: 6px;
+  transition: background .14s ease;
+}
+.btn-acao img { width: 18px; height: 18px; display: block; }
+
+.btn-acao.editar:hover { background: rgba(59,130,246,0.08); }
+.btn-acao.excluir:hover { background: rgba(239,68,68,0.08); }
+
+/* Painel de edição */
+#form-edicao-global .edicao-card {
+  width: 260px;
+}
+#form-edicao-global label { display: block; font-size: .9rem; margin-bottom: 8px; }
+#form-edicao-global input,
+#form-edicao-global select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-top: 4px;
+}
+#form-edicao-global .edicao-acoes { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Botões relatório */
+.gerar-relatorio-wrap {
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.btn-primary.small {
+  background: #0ea5e9;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.btn-outline.small {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.acao-cell { width: 110px; text-align: center; }
