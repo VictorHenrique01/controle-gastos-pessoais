@@ -12,6 +12,11 @@ class CategoriaDespesa(enum.Enum):
     moradia = "Moradia"
     outros = "Outros"
 
+# NOVO: Enum para classificar a despesa como fixa ou variável
+class TipoDespesa(enum.Enum):
+    fixa = "fixa"
+    variavel = "variavel"
+
 class Despesa(db.Model):
     __tablename__ = 'despesas'
     id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +26,9 @@ class Despesa(db.Model):
     
     # Coluna de categoria usando o Enum
     categoria = db.Column(Enum(CategoriaDespesa, name="categoria_enum"), nullable=False)
+
+    # NOVO: coluna de tipo usando o Enum
+    tipo = db.Column(Enum(TipoDespesa, name="tipo_enum"), nullable=False)
     
     # Chave estrangeira para criar a relação com o usuário
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
@@ -34,8 +42,9 @@ class Despesa(db.Model):
             "id": self.id,
             "descricao": self.descricao,
             "valor": self.valor,
-            "data": self.data.strftime('%Y-%m-%d'), # Formata a data para o JSON
-            "categoria": self.categoria.value # Pega o valor legível do Enum
+            "data": self.data.strftime('%Y-%m-%d'),
+            "categoria": self.categoria.value,
+            "tipo": self.tipo.name  # NOVO: retorna "fixa" ou "variavel"
         }
 
 # --- Funções que as rotas utilizam ---
@@ -45,7 +54,8 @@ def adicionar_despesa(dados):
         descricao=dados['descricao'],
         valor=float(dados['valor']),
         data=datetime.strptime(dados['data'], '%Y-%m-%d').date(),
-        categoria=CategoriaDespesa[dados['categoria']], # Converte a string da categoria para o tipo Enum
+        categoria=CategoriaDespesa[dados['categoria']],
+        tipo=TipoDespesa[dados['tipo']],  # NOVO
         usuario_id=dados['usuario_id']
     )
     db.session.add(nova_despesa)
@@ -57,17 +67,14 @@ def obter_despesas_por_usuario(usuario_id):
     return [despesa.to_dict() for despesa in despesas]
 
 def obter_despesa_por_id(despesa_id, usuario_id):
-    # Garante que a despesa pertence ao usuário logado
     return Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
 
 def atualizar_despesa(despesa_id, usuario_id, dados):
-    # Busca a despesa garantindo que pertence ao usuário
     despesa = Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
 
     if not despesa:
         return None
 
-    # Atualiza apenas os campos enviados
     if "descricao" in dados:
         despesa.descricao = dados["descricao"]
 
@@ -78,15 +85,17 @@ def atualizar_despesa(despesa_id, usuario_id, dados):
         despesa.data = datetime.strptime(dados["data"], "%Y-%m-%d").date()
 
     if "categoria" in dados:
-        # Converte string para enum corretamente
         despesa.categoria = CategoriaDespesa[dados["categoria"]]
+
+    # NOVO: permite alterar o tipo da despesa
+    if "tipo" in dados:
+        despesa.tipo = TipoDespesa[dados["tipo"]]
 
     db.session.commit()
     return despesa
 
 
 def remover_despesa(despesa_id, usuario_id):
-    # Busca garantindo que a despesa pertence ao usuário
     despesa = Despesa.query.filter_by(id=despesa_id, usuario_id=usuario_id).first()
 
     if not despesa:

@@ -9,7 +9,6 @@
 <body>
     <!-- BOTÃO DE PERFIL/LOGOUT -->
     <div class="user-controls">
-        <img src="/image/perfil-icon.svg" alt="Perfil" class="profile-icon">
         <button id="btnLogout" class="btn-logout">Sair</button>
     </div>
 
@@ -56,11 +55,21 @@
                         <option value="outros">Outros</option>
                     </select>
 
+
+
+
                     <label for="valor">Valor:</label>
                     <input type="number" id="valor" name="valor" placeholder="Ex: 150.00" required>
 
                     <label for="descricao">Descrição:</label>
                     <input type="text" id="descricao" name="descricao" placeholder="Ex: Conta de luz">
+
+                    <label for="tipo">Tipo de Despesa:</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Selecione</option>
+                            <option value="fixa">Fixa</option>
+                            <option value="variavel">Variável</option>
+                        </select>
 
                     <label for="data">Data:</label>
                     <input type="date" id="data" name="data" required>
@@ -93,6 +102,13 @@
                 <option value="outros">Outros</option>
             </select>
 
+            <!-- NOVO FILTRO -->
+            <select id="filtroTipo">
+                <option value="">Todos os tipos</option>
+                <option value="fixa">Fixa</option>
+                <option value="variavel">Variável</option>
+            </select>
+
             <input type="month" id="filtroMes" />
             <button id="limparFiltros">Limpar</button>
         </div>
@@ -109,6 +125,7 @@
                     <th>Categoria</th>
                     <th>Descrição</th>
                     <th>Valor (R$)</th>
+                    <th>Tipo</th>
                     <th>Data</th>
                 </tr>
             </thead>
@@ -117,7 +134,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2"><strong>Total:</strong></td>
+                    <td colspan="3"><strong>Total:</strong></td>
                     <td id="valorTotalTabela"><strong>R$ 0,00</strong></td>
                     <td></td>
                 </tr>
@@ -134,7 +151,7 @@
     <script>
         document.getElementById("btnLogout").addEventListener("click", () => {
             localStorage.removeItem("usuarioLogado");
-            window.location.href = "/templates/pagina_inicial.html";
+            window.location.href ="/pagina_inicial";
         });
     </script>
 
