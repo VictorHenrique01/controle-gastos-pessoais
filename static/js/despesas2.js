@@ -24,12 +24,75 @@
   const thead = tabela.querySelector("thead tr");
   const tfoot = tabela.querySelector("tfoot tr");
 
-  // Mapeamento de colunas por data-col — independente da ordem física.
-  // O despesas.js deve gravar o atributo data-col em cada <td>.
-  // Ex: <td data-col="categoria">alimentacao</td>
-  // Isso torna o código imune a qualquer reordenação futura de colunas.
   const getCol = (tr, colName) =>
     tr.querySelector(`td[data-col="${colName}"]`)?.innerText.trim() ?? "";
+
+
+  // ─── Cache de recorrências ───────────────────────────────────────────────────
+  // Mapa de despesa_id → frequencia, carregado uma vez e atualizado no evento
+  let recorrenciasMap = {};
+
+  async function carregarRecorrencias() {
+    try {
+      const res = await fetch("/recorrencias/");
+      if (!res.ok) return;
+      const lista = await res.json();
+      recorrenciasMap = {};
+      lista.forEach(r => { recorrenciasMap[r.despesa_id] = r.frequencia; });
+    } catch (e) {
+      console.warn("[despesas2] Não foi possível carregar recorrências.", e);
+    }
+  }
+
+  function aplicarBadgeRecorrencia(tr) {
+    const despesaId = parseInt(tr.dataset.id, 10);
+    if (!despesaId) return;
+
+    const frequencia = recorrenciasMap[despesaId];
+    if (!frequencia) return;
+
+    const tdDescricao = tr.querySelector('td[data-col="descricao"]');
+    if (!tdDescricao) return;
+
+    // Evita duplicar o badge se a linha for re-renderizada
+    if (tdDescricao.querySelector(".badge-recorrente")) return;
+
+    const labels = { semanal: "Semanal", mensal: "Mensal", anual: "Anual" };
+    const badge = document.createElement("span");
+    badge.className = "badge-recorrente";
+    badge.title = `Recorrência ${labels[frequencia] || frequencia}`;
+    badge.textContent = `🔁 ${labels[frequencia] || frequencia}`;
+
+    tdDescricao.appendChild(document.createTextNode(" "));
+    tdDescricao.appendChild(badge);
+  }
+
+  function aplicarBadgesEmTodasLinhas() {
+    qa("tbody tr", tabela).forEach(aplicarBadgeRecorrencia);
+  }
+
+  // Recarrega mapa e aplica badges quando uma recorrência é salva
+  document.addEventListener("recorrenciaSalva", async () => {
+    await carregarRecorrencias();
+    aplicarBadgesEmTodasLinhas();
+  });
+
+
+  // ─── Toast ──────────────────────────────────────────────────────────────────
+  window.mostrarToast = function (mensagem, tipo = "sucesso") {
+    const toast = document.createElement("div");
+    toast.className = `toast-notificacao toast-${tipo}`;
+    toast.textContent = mensagem;
+    document.body.appendChild(toast);
+
+    // Força reflow para a transição funcionar
+    requestAnimationFrame(() => toast.classList.add("toast-visivel"));
+
+    setTimeout(() => {
+      toast.classList.remove("toast-visivel");
+      toast.addEventListener("transitionend", () => toast.remove(), { once: true });
+    }, 3500);
+  };
 
 
   // ─── Coluna AÇÕES ────────────────────────────────────────────────────────────
@@ -133,12 +196,13 @@
   }
 
 
-  // ─── MutationObserver: aplica ações em novas linhas automaticamente ──────────
+  // ─── MutationObserver: aplica ações e badge em novas linhas ─────────────────
   new MutationObserver((mutations) => {
     mutations.forEach((m) =>
       m.addedNodes.forEach((node) => {
         if (node.nodeType === 1 && node.tagName === "TR") {
           addActionCell(node);
+          aplicarBadgeRecorrencia(node);
         }
       })
     );
@@ -148,8 +212,6 @@
 
   // ─── EXCLUIR ─────────────────────────────────────────────────────────────────
   async function handleDelete(tr) {
-    // ✅ ID lido diretamente do atributo data-id da linha.
-    // Nunca deduzido por comparação de texto.
     const id = tr.dataset.id;
 
     if (!id) {
@@ -168,21 +230,18 @@
         throw new Error(body.message || `HTTP ${res.status}`);
       }
 
-      // Só remove visualmente após confirmação do backend.
       tr.remove();
       recalcTotal();
 
     } catch (err) {
       console.error("[despesas2] Erro ao excluir:", err);
       alert(`Não foi possível excluir a despesa: ${err.message}`);
-      // ⚠️ Linha NÃO é removida se o backend falhar.
     }
   }
 
 
   // ─── EDITAR — abrir painel ────────────────────────────────────────────────────
   function openEditPanel(tr) {
-    // ✅ ID lido diretamente do atributo data-id da linha.
     const id = tr.dataset.id;
 
     if (!id) {
@@ -194,7 +253,6 @@
     currentEditingRow = tr;
     currentEditingId  = id;
 
-    // Lê valores usando data-col — imune à ordem física das colunas.
     q("#editar-categoria").value = getCol(tr, "categoria");
     q("#editar-tipo").value      = getCol(tr, "tipo");
     q("#editar-descricao").value = getCol(tr, "descricao");
@@ -206,12 +264,10 @@
       .trim();
     q("#editar-valor").value = Number(valorRaw) || "";
 
-    // Converte dd/mm/aaaa → aaaa-mm-dd para o input[type=date]
     const dataTexto = getCol(tr, "data");
     const [d, m, a] = dataTexto.split("/");
     q("#editar-data").value = (a && m && d) ? `${a}-${m}-${d}` : "";
 
-    // Limpa erro anterior
     const erroEl = q("#edicao-erro");
     erroEl.style.display = "none";
     erroEl.textContent = "";
@@ -238,7 +294,6 @@
     const valor     = parseFloat(q("#editar-valor").value);
     const data      = q("#editar-data").value;
 
-    // Validação básica
     if (!descricao || isNaN(valor) || !data) {
       const erroEl = q("#edicao-erro");
       erroEl.textContent = "Preencha todos os campos corretamente.";
@@ -260,7 +315,6 @@
         throw new Error(body.message || `HTTP ${res.status}`);
       }
 
-      // ✅ Atualiza a linha visualmente via data-col — sem reload.
       const tr = currentEditingRow;
 
       const set = (col, val) => {
@@ -315,5 +369,8 @@
   // ─── Inicialização ───────────────────────────────────────────────────────────
   qa("tbody tr", tabela).forEach(addActionCell);
   setTimeout(recalcTotal, 200);
+
+  // Carrega recorrências e aplica badges nas linhas já existentes
+  carregarRecorrencias().then(aplicarBadgesEmTodasLinhas);
 
 })();

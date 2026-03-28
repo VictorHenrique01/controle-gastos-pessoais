@@ -54,3 +54,272 @@
 }
 
 .acao-cell { width: 110px; text-align: center; }
+
+
+/* ─────────────────────────────────────────
+   MÓDULO: Despesas Recorrentes
+───────────────────────────────────────── */
+
+/* Toggle checkbox */
+.recorrencia-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.recorrencia-toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #2563eb;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.recorrencia-toggle input[type="checkbox"]:checked {
+  background: #2563eb;
+  border-color: #1d4ed8;
+}
+
+.recorrencia-toggle input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.recorrencia-toggle label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #bfdbfe;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+/* Bloco colapsável */
+#recorrencia-box {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.28s ease,
+              margin 0.2s ease;
+  margin-top: 0;
+}
+
+#recorrencia-box.hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+#recorrencia-box.visible {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 10px;
+  pointer-events: all;
+}
+
+/* Card interno */
+.recorrencia-card {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  border-radius: 12px;
+  padding: 18px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recorrencia-card::before {
+  content: "🔁 Recorrência";
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #60a5fa;
+  margin-bottom: 4px;
+}
+
+.recorrencia-card label {
+  font-size: 0.85rem;
+  color: #93c5fd;
+  margin-bottom: 2px;
+  display: block;
+  font-weight: 500;
+}
+
+.recorrencia-card select,
+.recorrencia-card input[type="date"] {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4edf8;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+
+.recorrencia-card select:focus,
+.recorrencia-card input[type="date"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+}
+
+.recorrencia-card select option {
+  background: #1e2d45;
+  color: #e4edf8;
+}
+
+/* Campo de data fim (opcional) */
+.rec-opcional {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rec-hint {
+  font-size: 0.75rem;
+  color: #60a5fa;
+  margin-top: 2px;
+}
+
+/* Preview das próximas ocorrências */
+#recPreview {
+  background: rgba(40, 167, 69, 0.07);
+  border: 1px solid rgba(40, 167, 69, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 4px;
+}
+
+#recPreview.hidden {
+  display: none;
+}
+
+#recPreview h4 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6dba87;
+  margin: 0 0 8px 0;
+}
+
+#recPreviewLista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#recPreviewLista li {
+  background: rgba(40, 167, 69, 0.12);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  color: #a3d9b1;
+  font-variant-numeric: tabular-nums;
+}
+
+#recPreviewLista li.rec-mais {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #60a5fa;
+  font-style: italic;
+}
+
+/* Badge "Recorrente" na tabela */
+.badge-recorrente {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #60a5fa;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+
+/* ─────────────────────────────────────────
+   MÓDULO: Toast de notificação
+───────────────────────────────────────── */
+
+.toast-notificacao {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  max-width: 360px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+
+.toast-notificacao.toast-visivel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-sucesso {
+  background: #1d4ed8;
+  color: #eff6ff;
+  border-left: 4px solid #60a5fa;
+}
+
+.toast-erro {
+  background: #991b1b;
+  color: #fef2f2;
+  border-left: 4px solid #f87171;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .recorrencia-card {
+    padding: 14px 14px 12px;
+  }
+
+  #recPreviewLista {
+    flex-direction: column;
+  }
+
+  .toast-notificacao {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: unset;
+  }
+}

@@ -55,9 +55,6 @@
                         <option value="outros">Outros</option>
                     </select>
 
-
-
-
                     <label for="valor">Valor:</label>
                     <input type="number" id="valor" name="valor" placeholder="Ex: 150.00" required>
 
@@ -65,14 +62,53 @@
                     <input type="text" id="descricao" name="descricao" placeholder="Ex: Conta de luz">
 
                     <label for="tipo">Tipo de Despesa:</label>
-                        <select id="tipo" name="tipo" required>
-                            <option value="">Selecione</option>
-                            <option value="fixa">Fixa</option>
-                            <option value="variavel">Variável</option>
-                        </select>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Selecione</option>
+                        <option value="fixa">Fixa</option>
+                        <option value="variavel">Variável</option>
+                    </select>
 
                     <label for="data">Data:</label>
                     <input type="date" id="data" name="data" required>
+
+                    <!-- RECORRÊNCIA -->
+                    <div class="recorrencia-toggle">
+                        <input type="checkbox" id="checkRecorrente" />
+                        <label for="checkRecorrente">Esta é uma despesa recorrente</label>
+                    </div>
+
+                    <div id="recorrencia-box" class="hidden">
+                        <div class="recorrencia-card">
+
+                            <div>
+                                <label for="recFrequencia">Frequência:</label>
+                                <select id="recFrequencia">
+                                    <option value="">Selecione</option>
+                                    <option value="semanal">Semanal (a cada 7 dias)</option>
+                                    <option value="mensal">Mensal</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="recDataInicio">Data de início:</label>
+                                <input type="date" id="recDataInicio" />
+                            </div>
+
+                            <div class="rec-opcional">
+                                <label for="recDataFim">Data de término (opcional):</label>
+                                <input type="date" id="recDataFim" />
+                                <span class="rec-hint">Deixe em branco para repetir indefinidamente</span>
+                            </div>
+
+                            <div id="recPreview" class="hidden">
+                                <h4>Próximas ocorrências</h4>
+                                <ul id="recPreviewLista"></ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- FIM RECORRÊNCIA -->
 
                     <button type="submit">Salvar</button>
                 </form>
@@ -102,7 +138,6 @@
                 <option value="outros">Outros</option>
             </select>
 
-            <!-- NOVO FILTRO -->
             <select id="filtroTipo">
                 <option value="">Todos os tipos</option>
                 <option value="fixa">Fixa</option>
@@ -146,6 +181,7 @@
     <script src="/static/js/orcamento.js"></script>
     <script src="static/js/despesas2.js"></script>
     <script src="static/js/relatorio.js"></script>
+    <script src="/static/js/recurrence.js"></script>
 
     <!-- SCRIPT DO BOTÃO LOGOUT -->
     <script>

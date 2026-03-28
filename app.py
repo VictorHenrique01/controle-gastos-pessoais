@@ -7,10 +7,12 @@ from db import db
 from models.usuario_model import Usuario
 from models.despesa_model import Despesa
 from models.orcamento_model import Orcamento
+from models.recorrencia_model import Recorrencia
 
 from routes.usuario_routes import usuario_bp
 from routes.despesa_routes import despesa_bp
-from routes.orcamento_routes import orcamento_bp  
+from routes.orcamento_routes import orcamento_bp
+from routes.recorrencia_routes import recorrencia_bp
 
 def create_app():
     app = Flask(__name__)
@@ -21,7 +23,8 @@ def create_app():
     
     app.register_blueprint(usuario_bp, url_prefix="/usuarios")
     app.register_blueprint(despesa_bp, url_prefix="/despesas")
-    app.register_blueprint(orcamento_bp, url_prefix="/orcamentos")  
+    app.register_blueprint(orcamento_bp, url_prefix="/orcamentos")
+    app.register_blueprint(recorrencia_bp, url_prefix="/recorrencias")
 
     @app.route("/")
     def index():
