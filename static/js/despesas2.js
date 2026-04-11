@@ -24,12 +24,27 @@
   const thead = tabela.querySelector("thead tr");
   const tfoot = tabela.querySelector("tfoot tr");
 
+  // Lê o innerText bruto da célula
   const getCol = (tr, colName) =>
     tr.querySelector(`td[data-col="${colName}"]`)?.innerText.trim() ?? "";
 
+  // ✅ CORREÇÃO — lê data-value da célula (valor bruto do enum gravado pelo despesas.js)
+  // Fallback: normaliza o innerText para lowercase sem acentos caso data-value não exista.
+  // Isso resolve o problema de categoria/tipo aparecendo vazio no painel de edição.
+  const getColValue = (tr, colName) => {
+    const td = tr.querySelector(`td[data-col="${colName}"]`);
+    if (!td) return "";
+    if (td.dataset.value) return td.dataset.value;
+    return td.innerText.trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace("variavel", "variavel")
+      .replace("variável", "variavel");
+  };
+
 
   // ─── Cache de recorrências ───────────────────────────────────────────────────
-  // Mapa de despesa_id → frequencia, carregado uma vez e atualizado no evento
   let recorrenciasMap = {};
 
   async function carregarRecorrencias() {
@@ -54,7 +69,6 @@
     const tdDescricao = tr.querySelector('td[data-col="descricao"]');
     if (!tdDescricao) return;
 
-    // Evita duplicar o badge se a linha for re-renderizada
     if (tdDescricao.querySelector(".badge-recorrente")) return;
 
     const labels = { semanal: "Semanal", mensal: "Mensal", anual: "Anual" };
@@ -71,7 +85,6 @@
     qa("tbody tr", tabela).forEach(aplicarBadgeRecorrencia);
   }
 
-  // Recarrega mapa e aplica badges quando uma recorrência é salva
   document.addEventListener("recorrenciaSalva", async () => {
     await carregarRecorrencias();
     aplicarBadgesEmTodasLinhas();
@@ -85,7 +98,6 @@
     toast.textContent = mensagem;
     document.body.appendChild(toast);
 
-    // Força reflow para a transição funcionar
     requestAnimationFrame(() => toast.classList.add("toast-visivel"));
 
     setTimeout(() => {
@@ -227,7 +239,8 @@
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || `HTTP ${res.status}`);
+        // ✅ CORREÇÃO — lê body.erro antes de body.message (padrão do back-end)
+        throw new Error(body.erro || body.message || `Erro HTTP ${res.status}`);
       }
 
       tr.remove();
@@ -253,8 +266,10 @@
     currentEditingRow = tr;
     currentEditingId  = id;
 
-    q("#editar-categoria").value = getCol(tr, "categoria");
-    q("#editar-tipo").value      = getCol(tr, "tipo");
+    // ✅ CORREÇÃO — getColValue retorna o valor do enum ("fixa", "alimentacao")
+    // em vez do innerText do badge ("Fixa", "Alimentação"), evitando select em branco
+    q("#editar-categoria").value = getColValue(tr, "categoria");
+    q("#editar-tipo").value      = getColValue(tr, "tipo");
     q("#editar-descricao").value = getCol(tr, "descricao");
 
     const valorRaw = getCol(tr, "valor")
@@ -294,7 +309,8 @@
     const valor     = parseFloat(q("#editar-valor").value);
     const data      = q("#editar-data").value;
 
-    if (!descricao || isNaN(valor) || !data) {
+    // ✅ CORREÇÃO — valida categoria e tipo além dos outros campos
+    if (!categoria || !tipo || !descricao || isNaN(valor) || !data) {
       const erroEl = q("#edicao-erro");
       erroEl.textContent = "Preencha todos os campos corretamente.";
       erroEl.style.display = "block";
@@ -311,8 +327,9 @@
       });
 
       if (!res.ok) {
+        // ✅ CORREÇÃO — lê body.erro (padrão do back-end Python) antes de body.message
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message || `HTTP ${res.status}`);
+        throw new Error(body.erro || body.message || `Erro HTTP ${res.status} — verifique os campos e tente novamente.`);
       }
 
       const tr = currentEditingRow;
@@ -338,7 +355,7 @@
     } catch (err) {
       console.error("[despesas2] Erro ao editar:", err);
       const erroEl = q("#edicao-erro");
-      erroEl.textContent = `Erro ao salvar: ${err.message}`;
+      erroEl.textContent = err.message;
       erroEl.style.display = "block";
     }
   });
@@ -370,7 +387,6 @@
   qa("tbody tr", tabela).forEach(addActionCell);
   setTimeout(recalcTotal, 200);
 
-  // Carrega recorrências e aplica badges nas linhas já existentes
   carregarRecorrencias().then(aplicarBadgesEmTodasLinhas);
 
 })();

@@ -4,7 +4,6 @@ from sqlalchemy import Enum
 import enum
 from datetime import datetime
 
-# Cria um tipo Enum para garantir que a categoria seja sempre uma das opções válidas
 class CategoriaDespesa(enum.Enum):
     alimentacao = "Alimentação"
     transporte = "Transporte"
@@ -12,7 +11,6 @@ class CategoriaDespesa(enum.Enum):
     moradia = "Moradia"
     outros = "Outros"
 
-# NOVO: Enum para classificar a despesa como fixa ou variável
 class TipoDespesa(enum.Enum):
     fixa = "fixa"
     variavel = "variavel"
@@ -23,20 +21,11 @@ class Despesa(db.Model):
     descricao = db.Column(db.String(255), nullable=False)
     valor = db.Column(db.Float, nullable=False)
     data = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    
-    # Coluna de categoria usando o Enum
     categoria = db.Column(Enum(CategoriaDespesa, name="categoria_enum"), nullable=False)
-
-    # NOVO: coluna de tipo usando o Enum
     tipo = db.Column(Enum(TipoDespesa, name="tipo_enum"), nullable=False)
-    
-    # Chave estrangeira para criar a relação com o usuário
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    
-    # Relação de volta para o modelo Usuario
     usuario = db.relationship('Usuario', back_populates='despesas')
 
-    # Função para converter o objeto em um dicionário (útil para o JSON)
     def to_dict(self):
         return {
             "id": self.id,
@@ -44,8 +33,9 @@ class Despesa(db.Model):
             "valor": self.valor,
             "data": self.data.strftime('%Y-%m-%d'),
             "categoria": self.categoria.value,
-            "tipo": self.tipo.name  # NOVO: retorna "fixa" ou "variavel"
+            "tipo": self.tipo.name
         }
+
 
 # --- Funções que as rotas utilizam ---
 
@@ -55,7 +45,7 @@ def adicionar_despesa(dados):
         valor=float(dados['valor']),
         data=datetime.strptime(dados['data'], '%Y-%m-%d').date(),
         categoria=CategoriaDespesa[dados['categoria']],
-        tipo=TipoDespesa[dados['tipo']],  # NOVO
+        tipo=TipoDespesa[dados['tipo']],
         usuario_id=dados['usuario_id']
     )
     db.session.add(nova_despesa)
@@ -87,7 +77,6 @@ def atualizar_despesa(despesa_id, usuario_id, dados):
     if "categoria" in dados:
         despesa.categoria = CategoriaDespesa[dados["categoria"]]
 
-    # NOVO: permite alterar o tipo da despesa
     if "tipo" in dados:
         despesa.tipo = TipoDespesa[dados["tipo"]]
 
@@ -100,6 +89,13 @@ def remover_despesa(despesa_id, usuario_id):
 
     if not despesa:
         return False
+
+    # ✅ CORREÇÃO — importação local para evitar circular import entre os models.
+    # Remove a recorrência vinculada primeiro (se existir) para não violar a FK
+    # do MySQL. As duas deleções ocorrem na mesma transação — se uma falhar,
+    # nenhuma é commitada.
+    from models.recorrencia_model import remover_recorrencia_por_despesa
+    remover_recorrencia_por_despesa(despesa_id, usuario_id)
 
     db.session.delete(despesa)
     db.session.commit()

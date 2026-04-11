@@ -110,14 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try { payload = JSON.parse(pendente); }
         catch { return; }
 
-        // Busca a lista atualizada para pegar o ID da última despesa salva
+        // ✅ CORREÇÃO — a lista vem ordenada por data DESC (mais recente primeiro),
+        // então despesas[0] é a despesa recém-salva, não despesas[despesas.length - 1].
         try {
             const resDespesas = await fetch("/despesas/");
             if (!resDespesas.ok) throw new Error("Erro ao buscar despesas.");
             const despesas = await resDespesas.json();
             if (!despesas.length) return;
 
-            payload.despesa_id = despesas[despesas.length - 1].id;
+            payload.despesa_id = despesas[0].id;
 
         } catch (err) {
             console.error("Recorrência: não foi possível obter o ID da despesa.", err);
@@ -137,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(erro.erro || "Erro ao salvar recorrência.");
             }
 
-            // Monta mensagem do toast com a próxima data
             const labels = { semanal: "Semanal", mensal: "Mensal", anual: "Anual" };
             const proximas = gerarProximasDatas(payload.frequencia, payload.data_inicio, payload.data_fim);
             let mensagemToast = `🔁 Recorrência ${labels[payload.frequencia]} salva!`;
@@ -150,7 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.mostrarToast(mensagemToast, "sucesso");
             }
 
-            // Notifica o despesas2.js para recarregar badges
             document.dispatchEvent(new CustomEvent("recorrenciaSalva"));
 
         } catch (err) {

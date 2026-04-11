@@ -17,14 +17,12 @@ class Recorrencia(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
     frequencia  = db.Column(Enum(FrequenciaRecorrencia, name="frequencia_enum"), nullable=False)
     data_inicio = db.Column(db.Date, nullable=False)
-    data_fim    = db.Column(db.Date, nullable=True)   # opcional
+    data_fim    = db.Column(db.Date, nullable=True)
     criado_em   = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Chave estrangeira para a despesa de origem
     despesa_id  = db.Column(db.Integer, db.ForeignKey('despesas.id'), nullable=False)
     despesa     = db.relationship('Despesa', backref='recorrencias')
 
-    # Chave estrangeira para o usuário (facilita queries sem JOIN)
     usuario_id  = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     usuario     = db.relationship('Usuario', backref='recorrencias')
 
@@ -68,3 +66,19 @@ def remover_recorrencia(recorrencia_id, usuario_id):
     db.session.delete(recorrencia)
     db.session.commit()
     return True
+
+
+# ✅ CORREÇÃO — deleta a recorrência vinculada antes de deletar a despesa,
+# evitando erro 500 por violação de FK no MySQL.
+def remover_recorrencia_por_despesa(despesa_id, usuario_id):
+    recorrencia = Recorrencia.query.filter_by(
+        despesa_id=despesa_id,
+        usuario_id=usuario_id
+    ).first()
+
+    if not recorrencia:
+        return  # despesa normal, sem recorrência vinculada — ok
+
+    db.session.delete(recorrencia)
+    # Não faz commit aqui — o commit fica na função remover_despesa
+    # para garantir que as duas deleções ocorram na mesma transação
