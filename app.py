@@ -8,7 +8,9 @@ from models.usuario_model import Usuario
 from models.despesa_model import Despesa
 from models.orcamento_model import Orcamento
 from models.recorrencia_model import Recorrencia
+from models.cartao_model import CompraCartao, ParcelaCartao, CategoriaCompra
 
+from routes.cartao_routes import cartao_bp
 from routes.usuario_routes import usuario_bp
 from routes.despesa_routes import despesa_bp
 from routes.orcamento_routes import orcamento_bp
@@ -25,12 +27,14 @@ def create_app():
     app.register_blueprint(despesa_bp, url_prefix="/despesas")
     app.register_blueprint(orcamento_bp, url_prefix="/orcamentos")
     app.register_blueprint(recorrencia_bp, url_prefix="/recorrencias")
+    app.register_blueprint(cartao_bp, url_prefix="/cartao")
 
     @app.route("/")
     def index():
-        if "usuario_id" in session:
-            return redirect(url_for('pagina_inicial'))
-        return redirect(url_for('usuarios.pagina_login'))
+        # Renderiza a landing page diretamente.
+        # Se o usuário já estiver logado, o template exibe o botão
+        # "Controlar Despesas" via {% if session.get('usuario_id') %}.
+        return render_template("pagina_inicial.html")
 
     @app.route("/pagina_inicial")
     def pagina_inicial():

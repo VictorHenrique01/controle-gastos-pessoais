@@ -177,17 +177,20 @@
         </table>
     </section>
 
+    <!-- ✅ Todos os scripts com barra inicial /static/ para funcionar no Docker -->
     <script src="/static/js/despesas.js"></script>
     <script src="/static/js/orcamento.js"></script>
-    <script src="static/js/despesas2.js"></script>
-    <script src="static/js/relatorio.js"></script>
+    <script src="/static/js/despesas2.js"></script>
+    <script src="/static/js/relatorio.js"></script>
     <script src="/static/js/recurrence.js"></script>
 
     <!-- SCRIPT DO BOTÃO LOGOUT -->
     <script>
-        document.getElementById("btnLogout").addEventListener("click", () => {
+        document.getElementById("btnLogout").addEventListener("click", async () => {
+            // ✅ Limpa sessão Flask no back-end antes de redirecionar
+            await fetch("/usuarios/logout", { method: "POST" });
             localStorage.removeItem("usuarioLogado");
-            window.location.href ="/pagina_inicial";
+            window.location.href = "/";
         });
     </script>
 

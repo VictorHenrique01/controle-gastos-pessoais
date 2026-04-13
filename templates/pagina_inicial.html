@@ -16,18 +16,44 @@
             <h1>Controle de Gastos</h1>
             <p>Organize seu dinheiro, conquiste seus objetivos.</p>
 
-            <div class="buttons">
-                <a href="/usuarios/cadastro" class="btn btn-primary">Cadastrar-se</a>
-                
-                <a href="/usuarios/login" class="btn btn-secondary">Entrar</a>
-            </div>
-
             {% if session.get('usuario_id') %}
-            <div id="controle-despesas-wrapper">
-                <a href="/pagina_inicial" class="btn-controlar-despesas">Controlar Despesas</a>
-            </div>
+
+                <!-- Usuário LOGADO: esconde cadastro/login, mostra os dois destinos -->
+                <p class="bem-vindo">Bem-vindo, <strong>{{ session.get('usuario_nome', 'Usuário') }}</strong>!</p>
+
+                <div class="buttons-logado">
+                    <a href="/pagina_inicial" class="btn btn-primary">
+                         Controlar Despesas
+                    </a>
+                    <a href="/cartao/" class="btn btn-cartao">
+                         Meus Parcelamentos
+                    </a>
+                </div>
+
+                <a href="#" id="btnSair" class="link-sair">Sair da conta</a>
+
+            {% else %}
+
+                <!-- Usuário NÃO logado: só cadastro e login -->
+                <div class="buttons">
+                    <a href="/usuarios/cadastro" class="btn btn-primary">Cadastrar-se</a>
+                    <a href="/usuarios/login" class="btn btn-secondary">Entrar</a>
+                </div>
+
             {% endif %}
         </div>
     </div>
+
+    {% if session.get('usuario_id') %}
+    <script>
+        document.getElementById("btnSair").addEventListener("click", async (e) => {
+            e.preventDefault();
+            await fetch("/usuarios/logout", { method: "POST" });
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "/";
+        });
+    </script>
+    {% endif %}
+
 </body>
 </html>

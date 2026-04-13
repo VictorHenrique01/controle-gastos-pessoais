@@ -5,7 +5,6 @@
     font-family: Arial, sans-serif;
 }
 
-/* estruturs geral */
 body {
     background-color: #fff;
     color: #333;
@@ -60,6 +59,7 @@ body {
     color: #555;
 }
 
+/* ── Botões estado deslogado ── */
 .buttons {
     display: flex;
     gap: 15px;
@@ -75,8 +75,16 @@ body {
 }
 
 .btn-primary {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
     background-color: #4a90e2;
     color: white;
+    transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
@@ -93,28 +101,53 @@ body {
     background: #f0f7ff;
 }
 
-/* Botão Controlar Despesas */
-.btn-controlar-despesas {
+/* ── Estado logado ── */
+.bem-vindo {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 24px !important;
+}
+
+.bem-vindo strong {
+    color: #4a90e2;
+}
+
+.buttons-logado {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.btn-cartao {
     display: inline-block;
-    margin-top: 20px;
-    padding: 12px 26px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    background-color: #4a90e2;
-    border-radius: 10px;
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
     text-decoration: none;
-    box-shadow: 0 6px 18px rgba(74, 144, 226, 0.2);
+    text-align: center;
+    background-color: #7c3aed;
+    color: white;
     transition: all 0.2s ease;
 }
 
-.btn-controlar-despesas:hover {
-    background-color: #3b7fd1;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
+.btn-cartao:hover {
+    background-color: #6d28d9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
 }
 
-.btn-controlar-despesas:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+.link-sair {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.link-sair:hover {
+    color: #dc2626;
+    text-decoration: underline;
 }
