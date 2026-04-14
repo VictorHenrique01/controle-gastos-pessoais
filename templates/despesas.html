@@ -7,10 +7,25 @@
     <link rel="stylesheet" href="/static/despesa2.css">
 </head>
 <body>
-    <!-- BOTÃO DE PERFIL/LOGOUT -->
-    <div class="user-controls">
-        <button id="btnLogout" class="btn-logout">Sair</button>
-    </div>
+
+    <!-- NAVBAR -->
+    <nav class="despesas-nav">
+        <a href="/" class="despesas-nav-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Início
+        </a>
+        <span class="despesas-nav-title">Controle de Despesas</span>
+        <div class="despesas-nav-acoes">
+            <a href="/cartao/" class="despesas-nav-btn despesas-nav-cartao">
+                💳 Parcelamentos
+            </a>
+            <button id="btnLogout" class="despesas-nav-btn despesas-nav-sair">
+                Sair
+            </button>
+        </div>
+    </nav>
 
     <div class="hero">
         <div class="overlay"></div>
@@ -177,17 +192,14 @@
         </table>
     </section>
 
-    <!-- ✅ Todos os scripts com barra inicial /static/ para funcionar no Docker -->
     <script src="/static/js/despesas.js"></script>
     <script src="/static/js/orcamento.js"></script>
     <script src="/static/js/despesas2.js"></script>
     <script src="/static/js/relatorio.js"></script>
     <script src="/static/js/recurrence.js"></script>
 
-    <!-- SCRIPT DO BOTÃO LOGOUT -->
     <script>
         document.getElementById("btnLogout").addEventListener("click", async () => {
-            // ✅ Limpa sessão Flask no back-end antes de redirecionar
             await fetch("/usuarios/logout", { method: "POST" });
             localStorage.removeItem("usuarioLogado");
             window.location.href = "/";
