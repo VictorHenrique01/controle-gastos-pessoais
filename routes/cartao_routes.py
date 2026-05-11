@@ -5,6 +5,7 @@ from models.cartao_model import (
     adicionar_compra,
     obter_compras_por_usuario,
     obter_compra_por_id,
+    atualizar_compra,
     obter_fatura,
     obter_resumo,
     remover_compra,
@@ -75,6 +76,39 @@ def listar_compras():
     return jsonify(compras)
 
 
+@cartao_bp.route("/compras/<int:compra_id>", methods=["PATCH"])
+def editar_compra(compra_id):
+    if "usuario_id" not in session:
+        return jsonify({"erro": "Acesso não autorizado"}), 401
+
+    dados = request.get_json() or {}
+
+    if not dados:
+        return jsonify({"erro": "Nenhum dado enviado."}), 400
+
+    try:
+        if "categoria" in dados:
+            CategoriaCompra[dados["categoria"]]
+
+        if "dia_vencimento" in dados:
+            dia = int(dados["dia_vencimento"])
+            if not (1 <= dia <= 28):
+                return jsonify({"erro": "Dia de vencimento inválido (1 a 28)."}), 400
+
+        compra = atualizar_compra(compra_id, session["usuario_id"], dados)
+
+        if not compra:
+            return jsonify({"erro": "Compra não encontrada."}), 404
+
+        return jsonify(compra.to_dict()), 200
+
+    except KeyError:
+        return jsonify({"erro": "Categoria inválida."}), 400
+    except Exception as e:
+        print("Erro ao editar compra:", e)
+        return jsonify({"erro": "Erro interno ao editar compra."}), 500
+
+
 @cartao_bp.route("/compras/<int:compra_id>", methods=["DELETE"])
 def excluir_compra(compra_id):
     if "usuario_id" not in session:
@@ -104,7 +138,7 @@ def ver_fatura(ano, mes):
     return jsonify(fatura)
 
 
-# ─── Resumo (cards do topo) ───────────────────────────────────────────────────
+# ─── Resumo ───────────────────────────────────────────────────────────────────
 
 @cartao_bp.route("/resumo/", methods=["GET"])
 def ver_resumo():

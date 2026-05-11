@@ -2,11 +2,12 @@
 // Integração completa da página de parcelamentos.
 //
 // ENDPOINTS UTILIZADOS:
-//   GET  /cartao/resumo/                    → cards do topo
-//   GET  /cartao/compras/                   → lista de compras ativas
-//   POST /cartao/compras/                   → registrar nova compra
+//   GET    /cartao/resumo/                  → cards do topo
+//   GET    /cartao/compras/                 → lista de compras ativas
+//   POST   /cartao/compras/                 → registrar nova compra
+//   PATCH  /cartao/compras/<id>             → editar compra existente
 //   DELETE /cartao/compras/<id>             → cancelar compra
-//   PATCH /cartao/parcelas/<id>/pagar       → marcar parcela como paga
+//   PATCH  /cartao/parcelas/<id>/pagar      → marcar parcela como paga
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -19,16 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${dia}/${mes}/${ano}`;
     };
 
-    const diasAteVencer = (isoDate) => {
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        const venc = new Date(isoDate + "T00:00:00");
-        return Math.round((venc - hoje) / (1000 * 60 * 60 * 24));
-    };
-
     const nomesMeses = [
-        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
     ];
 
     // ─── Referências DOM ─────────────────────────────────────
@@ -42,7 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const elCountAtivos     = document.getElementById("countAtivos");
 
     // Modal / form
+    const modalOverlay      = document.getElementById("modal-overlay");
     const formCartao        = document.getElementById("form-cartao");
+    const elModalTitulo     = document.querySelector(".modal-header h3");
     const elDescricao       = document.getElementById("fc-descricao");
     const elValor           = document.getElementById("fc-valor");
     const elParcelas        = document.getElementById("fc-parcelas");
@@ -52,17 +48,101 @@ document.addEventListener("DOMContentLoaded", () => {
     const elPreview         = document.getElementById("fc-preview");
     const elPreviewValor    = document.getElementById("fc-preview-valor");
     const elFormErro        = document.getElementById("form-erro");
-    const modalOverlay      = document.getElementById("modal-overlay");
 
-    // ─── Preview automático de parcelas no modal ─────────────
+    // Campos bloqueados na edição (valor e parcelas não podem mudar)
+    const camposBloqueadosEdicao = [elValor, elParcelas, elDataCompra];
+
+    // Estado do modal: "novo" ou "editar"
+    let modoModal    = "novo";
+    let editandoId   = null;
+    let editandoDados = null; // dados originais da compra sendo editada
+
+    // ─── Abrir modal para NOVA compra ────────────────────────
+    document.getElementById("btnNovaCompra").addEventListener("click", () => {
+        abrirModalNovo();
+    });
+
+    function abrirModalNovo() {
+        modoModal  = "novo";
+        editandoId = null;
+        editandoDados = null;
+
+        elModalTitulo.textContent = "Registrar compra parcelada";
+        formCartao.reset();
+        elPreview.classList.add("hidden");
+        elFormErro.classList.add("hidden");
+
+        // Desbloqueia campos
+        camposBloqueadosEdicao.forEach(el => {
+            el.disabled = false;
+            el.style.opacity = "";
+            el.style.cursor = "";
+        });
+
+        modalOverlay.classList.remove("hidden");
+    }
+
+    // ─── Abrir modal para EDITAR compra ──────────────────────
+    function abrirModalEdicao(compra) {
+        modoModal     = "editar";
+        editandoId    = compra.id;
+        editandoDados = compra;
+
+        elModalTitulo.textContent = "Editar compra";
+        elFormErro.classList.add("hidden");
+
+        // Preenche campos com os dados atuais
+        elDescricao.value   = compra.descricao;
+        elValor.value       = compra.valor_total;
+        elParcelas.value    = compra.parcelas;
+        elCategoria.value   = compra.categoria;
+        elDataCompra.value  = compra.data_compra;
+        elDiaVenc.value     = compra.dia_vencimento;
+
+        // Bloqueia campos que não podem ser editados
+        camposBloqueadosEdicao.forEach(el => {
+            el.disabled = true;
+            el.style.opacity = "0.5";
+            el.style.cursor  = "not-allowed";
+        });
+
+        // Preview com os valores travados
+        const valorParcela = compra.valor_total / compra.parcelas;
+        elPreviewValor.textContent = `${compra.parcelas}x de ${formatBRL(valorParcela)}`;
+        elPreview.classList.remove("hidden");
+
+        modalOverlay.classList.remove("hidden");
+    }
+
+    // ─── Fechar modal ─────────────────────────────────────────
+    function fecharModal() {
+        modalOverlay.classList.add("hidden");
+        formCartao.reset();
+        elPreview.classList.add("hidden");
+        elFormErro.classList.add("hidden");
+        camposBloqueadosEdicao.forEach(el => {
+            el.disabled = false;
+            el.style.opacity = "";
+            el.style.cursor  = "";
+        });
+        modoModal     = "novo";
+        editandoId    = null;
+        editandoDados = null;
+    }
+
+    document.getElementById("btnFecharModal").addEventListener("click", fecharModal);
+    document.getElementById("btnCancelarModal").addEventListener("click", fecharModal);
+    modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) fecharModal();
+    });
+
+    // ─── Preview automático de parcelas (só no modo novo) ────
     const atualizarPreviewModal = () => {
+        if (modoModal === "editar") return;
         const valor    = parseFloat(elValor.value);
         const parcelas = parseInt(elParcelas.value);
-
         if (valor > 0 && parcelas > 0) {
-            const valorParcela = valor / parcelas;
-            elPreviewValor.textContent =
-                `${parcelas}x de ${formatBRL(valorParcela)}`;
+            elPreviewValor.textContent = `${parcelas}x de ${formatBRL(valor / parcelas)}`;
             elPreview.classList.remove("hidden");
         } else {
             elPreview.classList.add("hidden");
@@ -71,6 +151,118 @@ document.addEventListener("DOMContentLoaded", () => {
 
     elValor.addEventListener("input", atualizarPreviewModal);
     elParcelas.addEventListener("change", atualizarPreviewModal);
+
+    // ─── Submit do form ───────────────────────────────────────
+    formCartao.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        elFormErro.classList.add("hidden");
+
+        if (modoModal === "editar") {
+            await handleSalvarEdicao();
+        } else {
+            await handleSalvarNovo();
+        }
+    });
+
+    // ─── Salvar NOVA compra ───────────────────────────────────
+    async function handleSalvarNovo() {
+        const descricao     = elDescricao.value.trim();
+        const valor         = parseFloat(elValor.value);
+        const parcelas      = parseInt(elParcelas.value);
+        const categoria     = elCategoria.value;
+        const dataCompra    = elDataCompra.value;
+        const diaVencimento = parseInt(elDiaVenc.value);
+
+        if (!descricao || isNaN(valor) || valor <= 0) {
+            mostrarErroForm("Informe uma descrição e um valor válido."); return;
+        }
+        if (!parcelas || parcelas < 1 || parcelas > 12) {
+            mostrarErroForm("Selecione o número de parcelas (1 a 12)."); return;
+        }
+        if (!categoria) {
+            mostrarErroForm("Selecione uma categoria."); return;
+        }
+        if (!dataCompra) {
+            mostrarErroForm("Informe a data da compra."); return;
+        }
+        if (!diaVencimento || diaVencimento < 1 || diaVencimento > 28) {
+            mostrarErroForm("Informe o dia de vencimento entre 1 e 28."); return;
+        }
+
+        try {
+            const res = await fetch("/cartao/compras/", {
+                method:  "POST",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify({
+                    descricao,
+                    valor_total:    valor,
+                    parcelas,
+                    categoria,
+                    data_compra:    dataCompra,
+                    dia_vencimento: diaVencimento
+                })
+            });
+
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.erro || `Erro HTTP ${res.status}`);
+            }
+
+            fecharModal();
+            await carregarCompras();
+            await carregarResumo();
+
+        } catch (err) {
+            console.error("[cartao] Erro ao salvar compra:", err);
+            mostrarErroForm(err.message);
+        }
+    }
+
+    // ─── Salvar EDIÇÃO de compra ──────────────────────────────
+    async function handleSalvarEdicao() {
+        const descricao     = elDescricao.value.trim();
+        const categoria     = elCategoria.value;
+        const diaVencimento = parseInt(elDiaVenc.value);
+
+        if (!descricao) {
+            mostrarErroForm("A descrição não pode estar vazia."); return;
+        }
+        if (!categoria) {
+            mostrarErroForm("Selecione uma categoria."); return;
+        }
+        if (!diaVencimento || diaVencimento < 1 || diaVencimento > 28) {
+            mostrarErroForm("Informe o dia de vencimento entre 1 e 28."); return;
+        }
+
+        // Envia apenas os campos editáveis
+        const payload = { descricao, categoria, dia_vencimento: diaVencimento };
+
+        try {
+            const res = await fetch(`/cartao/compras/${editandoId}`, {
+                method:  "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.erro || `Erro HTTP ${res.status}`);
+            }
+
+            fecharModal();
+            await carregarCompras();
+            await carregarResumo();
+
+        } catch (err) {
+            console.error("[cartao] Erro ao editar compra:", err);
+            mostrarErroForm(err.message);
+        }
+    }
+
+    const mostrarErroForm = (msg) => {
+        elFormErro.textContent = msg;
+        elFormErro.classList.remove("hidden");
+    };
 
     // ─── Carregar resumo (cards do topo) ─────────────────────
     const carregarResumo = async () => {
@@ -84,7 +276,6 @@ document.addEventListener("DOMContentLoaded", () => {
             elTotalProximo.textContent = formatBRL(dados.total_proximo_mes);
             elTotalAtivos.textContent  = `${dados.compras_ativas} ativo${dados.compras_ativas !== 1 ? "s" : ""}`;
 
-            // Label dinâmico do card verde
             const proximo = new Date();
             proximo.setMonth(proximo.getMonth() + 1);
             elProximoLabel.textContent = nomesMeses[proximo.getMonth()];
@@ -101,14 +292,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const progresso         = Math.round((compra.parcelas_pagas / compra.parcelas) * 100);
         const quitado           = parcelasRestantes === 0;
 
-        // Busca a próxima parcela não paga para exibir vencimento
-        // O back-end não retorna parcelas individuais no GET /compras/,
-        // então calculamos o vencimento estimado localmente
         const card = document.createElement("div");
         card.className = "card-parcela";
         card.dataset.id = compra.id;
 
-        // Badge de progresso
         const badgeClass = quitado ? "badge-parcela badge-quitado" : "badge-parcela";
         const badgeTexto = quitado
             ? "✓ Quitado"
@@ -156,7 +343,13 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>` : ""}
         `;
 
-        // Listener de cancelar
+        // Listener Editar
+        const btnEditar = card.querySelector(".btn-editar-card");
+        if (btnEditar) {
+            btnEditar.addEventListener("click", () => abrirModalEdicao(compra));
+        }
+
+        // Listener Cancelar
         const btnCancelar = card.querySelector(".btn-cancelar-card");
         if (btnCancelar) {
             btnCancelar.addEventListener("click", () => handleCancelar(compra.id, card));
@@ -174,7 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             elLista.innerHTML = "";
 
-            // Filtra apenas compras com parcelas restantes (ativas)
             const ativas = compras.filter(c => c.parcelas_pagas < c.parcelas);
 
             if (ativas.length === 0) {
@@ -205,7 +397,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             cardEl.remove();
 
-            // Atualiza contagem e resumo
             const restantes = elLista.querySelectorAll(".card-parcela").length;
             if (restantes === 0) {
                 elMsgVazia.classList.add("visivel");
@@ -221,90 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(`Não foi possível cancelar: ${err.message}`);
         }
     };
-
-    // ─── Submit do form — nova compra ─────────────────────────
-    formCartao.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        elFormErro.classList.add("hidden");
-        elFormErro.textContent = "";
-
-        const descricao     = elDescricao.value.trim();
-        const valor         = parseFloat(elValor.value);
-        const parcelas      = parseInt(elParcelas.value);
-        const categoria     = elCategoria.value;
-        const dataCompra    = elDataCompra.value;
-        const diaVencimento = parseInt(elDiaVenc.value);
-
-        // Validação client-side
-        if (!descricao || isNaN(valor) || valor <= 0) {
-            mostrarErroForm("Informe uma descrição e um valor válido.");
-            return;
-        }
-        if (!parcelas || parcelas < 1 || parcelas > 12) {
-            mostrarErroForm("Selecione o número de parcelas (1 a 12).");
-            return;
-        }
-        if (!categoria) {
-            mostrarErroForm("Selecione uma categoria.");
-            return;
-        }
-        if (!dataCompra) {
-            mostrarErroForm("Informe a data da compra.");
-            return;
-        }
-        if (!diaVencimento || diaVencimento < 1 || diaVencimento > 28) {
-            mostrarErroForm("Informe o dia de vencimento entre 1 e 28.");
-            return;
-        }
-
-        const payload = {
-            descricao,
-            valor_total:     valor,
-            parcelas,
-            categoria,
-            data_compra:     dataCompra,
-            dia_vencimento:  diaVencimento
-        };
-
-        try {
-            const res = await fetch("/cartao/compras/", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
-                body:    JSON.stringify(payload)
-            });
-
-            if (!res.ok) {
-                const body = await res.json().catch(() => ({}));
-                throw new Error(body.erro || `Erro HTTP ${res.status}`);
-            }
-
-            // Fecha modal, limpa form e recarrega
-            modalOverlay.classList.add("hidden");
-            formCartao.reset();
-            elPreview.classList.add("hidden");
-
-            await carregarCompras();
-            await carregarResumo();
-
-        } catch (err) {
-            console.error("[cartao] Erro ao salvar compra:", err);
-            mostrarErroForm(err.message);
-        }
-    });
-
-    const mostrarErroForm = (msg) => {
-        elFormErro.textContent = msg;
-        elFormErro.classList.remove("hidden");
-    };
-
-    // Limpa erro ao fechar modal
-    modalOverlay.addEventListener("click", (e) => {
-        if (e.target === modalOverlay) {
-            elFormErro.classList.add("hidden");
-            elFormErro.textContent = "";
-        }
-    });
 
     // ─── Inicialização ────────────────────────────────────────
     carregarResumo();

@@ -23,14 +23,12 @@ class CompraCartao(db.Model):
     parcelas         = db.Column(db.Integer, nullable=False, default=1)
     categoria        = db.Column(Enum(CategoriaCompra, name="categoria_compra_enum"), nullable=False)
     data_compra      = db.Column(db.Date, nullable=False)
-    dia_vencimento   = db.Column(db.Integer, nullable=False)  # ex: 10
+    dia_vencimento   = db.Column(db.Integer, nullable=False)
     criado_em        = db.Column(db.DateTime, default=datetime.utcnow)
 
     usuario_id       = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     usuario          = db.relationship('Usuario', backref='compras_cartao')
 
-    # Relação com parcelas — cascade garante que ao deletar a compra,
-    # todas as parcelas são deletadas automaticamente (sem erro de FK)
     parcelas_rel     = db.relationship(
         'ParcelaCartao',
         backref='compra',
@@ -57,7 +55,7 @@ class ParcelaCartao(db.Model):
     __tablename__ = 'parcelas_cartao'
 
     id               = db.Column(db.Integer, primary_key=True)
-    numero_parcela   = db.Column(db.Integer, nullable=False)   # 1, 2, 3...
+    numero_parcela   = db.Column(db.Integer, nullable=False)
     valor_parcela    = db.Column(db.Float, nullable=False)
     data_vencimento  = db.Column(db.Date, nullable=False)
     paga             = db.Column(db.Boolean, nullable=False, default=False)
@@ -78,27 +76,15 @@ class ParcelaCartao(db.Model):
 # ─── Funções auxiliares ───────────────────────────────────────────────────────
 
 def _calcular_vencimento(data_compra: date, numero_parcela: int, dia_vencimento: int) -> date:
-    """
-    Calcula a data de vencimento de cada parcela.
-    Parcela 1 vence no próximo mês após a compra (ou no mesmo mês se
-    a compra foi antes do dia de vencimento).
-    """
-    # Se a compra foi antes do dia de vencimento nesse mês,
-    # a primeira parcela vence ainda nesse mês; caso contrário, no próximo.
     if data_compra.day < dia_vencimento:
         base = data_compra.replace(day=dia_vencimento)
     else:
         base = (data_compra + relativedelta(months=1)).replace(day=dia_vencimento)
-
-    # Avança N-1 meses para as parcelas seguintes
-    vencimento = base + relativedelta(months=numero_parcela - 1)
-    return vencimento
+    return base + relativedelta(months=numero_parcela - 1)
 
 
 def _gerar_parcelas(compra: CompraCartao) -> None:
-    """Gera os registros de ParcelaCartao para uma CompraCartao recém-criada."""
     valor_parcela = round(compra.valor_total / compra.parcelas, 2)
-
     for i in range(1, compra.parcelas + 1):
         vencimento = _calcular_vencimento(compra.data_compra, i, compra.dia_vencimento)
         parcela = ParcelaCartao(
@@ -124,7 +110,7 @@ def adicionar_compra(dados: dict, usuario_id: int) -> dict:
         usuario_id      = usuario_id
     )
     db.session.add(compra)
-    db.session.flush()   # gera o compra.id sem commit ainda
+    db.session.flush()
     _gerar_parcelas(compra)
     db.session.commit()
     return compra.to_dict()
@@ -144,13 +130,41 @@ def obter_compra_por_id(compra_id: int, usuario_id: int):
     return CompraCartao.query.filter_by(id=compra_id, usuario_id=usuario_id).first()
 
 
+def atualizar_compra(compra_id: int, usuario_id: int, dados: dict):
+    """
+    Permite editar: descricao, categoria, dia_vencimento.
+    Valor e parcelas são bloqueados pois as parcelas já foram geradas.
+    Se dia_vencimento mudar, recalcula as datas das parcelas ainda não pagas.
+    """
+    compra = CompraCartao.query.filter_by(id=compra_id, usuario_id=usuario_id).first()
+    if not compra:
+        return None
+
+    if "descricao" in dados:
+        compra.descricao = dados["descricao"]
+
+    if "categoria" in dados:
+        compra.categoria = CategoriaCompra[dados["categoria"]]
+
+    if "dia_vencimento" in dados:
+        novo_dia = int(dados["dia_vencimento"])
+        dia_mudou = novo_dia != compra.dia_vencimento
+        compra.dia_vencimento = novo_dia
+
+        # Recalcula vencimento apenas das parcelas ainda não pagas
+        if dia_mudou:
+            parcelas_abertas = compra.parcelas_rel.filter_by(paga=False).all()
+            for p in parcelas_abertas:
+                p.data_vencimento = _calcular_vencimento(
+                    compra.data_compra, p.numero_parcela, novo_dia
+                )
+
+    db.session.commit()
+    return compra
+
+
 def obter_fatura(usuario_id: int, ano: int, mes: int) -> dict:
-    """
-    Retorna todas as parcelas com vencimento no mês/ano informado,
-    junto com o total da fatura.
-    """
     data_inicio = date(ano, mes, 1)
-    # último dia do mês
     data_fim = (data_inicio + relativedelta(months=1)) - relativedelta(days=1)
 
     parcelas = (
@@ -166,30 +180,21 @@ def obter_fatura(usuario_id: int, ano: int, mes: int) -> dict:
     )
 
     total = round(sum(p.valor_parcela for p in parcelas), 2)
-
     return {
-        "ano":     ano,
-        "mes":     mes,
-        "total":   total,
+        "ano":      ano,
+        "mes":      mes,
+        "total":    total,
         "parcelas": [p.to_dict() for p in parcelas]
     }
 
 
 def obter_resumo(usuario_id: int) -> dict:
-    """
-    Retorna os dados para os cards de resumo:
-    - total comprometido no mês atual
-    - total geral ainda a pagar (parcelas futuras não pagas)
-    - total no próximo mês
-    - quantidade de compras ativas (com parcelas não pagas)
-    """
     hoje = date.today()
     proximo = hoje + relativedelta(months=1)
 
     fatura_mes     = obter_fatura(usuario_id, hoje.year, hoje.month)
     fatura_proximo = obter_fatura(usuario_id, proximo.year, proximo.month)
 
-    # Total ainda a pagar (todas as parcelas não pagas do usuário)
     parcelas_abertas = (
         ParcelaCartao.query
         .join(CompraCartao)
@@ -201,7 +206,6 @@ def obter_resumo(usuario_id: int) -> dict:
     )
     total_aberto = round(sum(p.valor_parcela for p in parcelas_abertas), 2)
 
-    # Compras com ao menos uma parcela não paga = ativas
     compras_ativas = (
         db.session.query(CompraCartao)
         .join(ParcelaCartao)
@@ -214,10 +218,10 @@ def obter_resumo(usuario_id: int) -> dict:
     )
 
     return {
-        "total_mes":        fatura_mes["total"],
+        "total_mes":         fatura_mes["total"],
         "total_proximo_mes": fatura_proximo["total"],
-        "total_aberto":     total_aberto,
-        "compras_ativas":   compras_ativas
+        "total_aberto":      total_aberto,
+        "compras_ativas":    compras_ativas
     }
 
 
@@ -225,8 +229,6 @@ def remover_compra(compra_id: int, usuario_id: int) -> bool:
     compra = CompraCartao.query.filter_by(id=compra_id, usuario_id=usuario_id).first()
     if not compra:
         return False
-    # cascade='all, delete-orphan' no relacionamento garante que
-    # as parcelas são deletadas junto, sem erro de FK.
     db.session.delete(compra)
     db.session.commit()
     return True
