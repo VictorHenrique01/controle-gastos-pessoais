@@ -3,7 +3,7 @@ from models.despesa_model import (
     adicionar_despesa,
     obter_despesas_por_usuario,
     CategoriaDespesa,
-    TipoDespesa,  # NOVO
+    TipoDespesa,
     obter_despesa_por_id,
     remover_despesa
 )
@@ -18,13 +18,11 @@ def criar_despesa():
 
     dados = request.get_json()
 
-    # 🔹 Agora inclui "tipo" como obrigatório
     campos_obrigatorios = ["descricao", "valor", "categoria", "data", "tipo"]
 
     if not all(campo in dados and dados[campo] for campo in campos_obrigatorios):
         return jsonify({"erro": "Todos os campos são obrigatórios."}), 400
 
-    # 🔹 Validação de categoria e tipo
     try:
         CategoriaDespesa[dados["categoria"]]
         TipoDespesa[dados["tipo"]]
@@ -75,7 +73,6 @@ def editar_despesa(despesa_id):
         return jsonify({"erro": "Nenhum dado enviado."}), 400
 
     try:
-        # 🔹 Validação opcional antes de atualizar
         if "categoria" in dados:
             CategoriaDespesa[dados["categoria"]]
 

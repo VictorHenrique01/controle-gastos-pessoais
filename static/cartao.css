@@ -499,6 +499,17 @@ body {
 }
 .btn-secundario:hover { background: #e2e8f0; }
 
+.btn-ver-despesas {
+    text-align: center;
+    text-decoration: none;
+    background: #f0fdf4;
+    color: #059669;
+    border: 1px solid #bbf7d0;
+}
+.btn-ver-despesas:hover {
+    background: #dcfce7;
+}
+
 /* ── ANIMAÇÕES ───────────────────────── */
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }

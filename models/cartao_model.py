@@ -76,7 +76,10 @@ class ParcelaCartao(db.Model):
 # ─── Funções auxiliares ───────────────────────────────────────────────────────
 
 def _calcular_vencimento(data_compra: date, numero_parcela: int, dia_vencimento: int) -> date:
-    if data_compra.day < dia_vencimento:
+    # ✅ CORREÇÃO — usa <= em vez de < para tratar o caso onde
+    # data_compra.day == dia_vencimento (ex: compra dia 20, vence dia 20).
+    # Antes: condição < era falsa → jogava para o mês seguinte incorretamente.
+    if data_compra.day <= dia_vencimento:
         base = data_compra.replace(day=dia_vencimento)
     else:
         base = (data_compra + relativedelta(months=1)).replace(day=dia_vencimento)
@@ -97,6 +100,22 @@ def _gerar_parcelas(compra: CompraCartao) -> None:
         db.session.add(parcela)
 
 
+def _parcela_do_mes_atual(compra: CompraCartao):
+    hoje = date.today()
+    inicio_mes = hoje.replace(day=1)
+    fim_mes = (inicio_mes + relativedelta(months=1)) - relativedelta(days=1)
+
+    return (
+        ParcelaCartao.query
+        .filter(
+            ParcelaCartao.compra_id == compra.id,
+            ParcelaCartao.data_vencimento >= inicio_mes,
+            ParcelaCartao.data_vencimento <= fim_mes
+        )
+        .first()
+    )
+
+
 # ─── Funções que as rotas utilizam ───────────────────────────────────────────
 
 def adicionar_compra(dados: dict, usuario_id: int) -> dict:
@@ -112,6 +131,14 @@ def adicionar_compra(dados: dict, usuario_id: int) -> dict:
     db.session.add(compra)
     db.session.flush()
     _gerar_parcelas(compra)
+    db.session.flush()
+
+    # Cria despesa automática para a parcela do mês atual (se houver)
+    parcela_mes = _parcela_do_mes_atual(compra)
+    if parcela_mes:
+        from models.despesa_model import criar_despesa_de_parcela
+        criar_despesa_de_parcela(parcela_mes, compra, usuario_id)
+
     db.session.commit()
     return compra.to_dict()
 
@@ -131,11 +158,6 @@ def obter_compra_por_id(compra_id: int, usuario_id: int):
 
 
 def atualizar_compra(compra_id: int, usuario_id: int, dados: dict):
-    """
-    Permite editar: descricao, categoria, dia_vencimento.
-    Valor e parcelas são bloqueados pois as parcelas já foram geradas.
-    Se dia_vencimento mudar, recalcula as datas das parcelas ainda não pagas.
-    """
     compra = CompraCartao.query.filter_by(id=compra_id, usuario_id=usuario_id).first()
     if not compra:
         return None
@@ -151,7 +173,6 @@ def atualizar_compra(compra_id: int, usuario_id: int, dados: dict):
         dia_mudou = novo_dia != compra.dia_vencimento
         compra.dia_vencimento = novo_dia
 
-        # Recalcula vencimento apenas das parcelas ainda não pagas
         if dia_mudou:
             parcelas_abertas = compra.parcelas_rel.filter_by(paga=False).all()
             for p in parcelas_abertas:

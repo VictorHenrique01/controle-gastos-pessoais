@@ -76,11 +76,13 @@
                     <label for="descricao">Descrição:</label>
                     <input type="text" id="descricao" name="descricao" placeholder="Ex: Conta de luz">
 
+                    <!-- ✅ Parcelado adicionado — permite editar manualmente se necessário -->
                     <label for="tipo">Tipo de Despesa:</label>
                     <select id="tipo" name="tipo" required>
                         <option value="">Selecione</option>
                         <option value="fixa">Fixa</option>
                         <option value="variavel">Variável</option>
+                        <option value="parcelado">Parcelado</option>
                     </select>
 
                     <label for="data">Data:</label>
@@ -153,10 +155,12 @@
                 <option value="outros">Outros</option>
             </select>
 
+            <!-- ✅ Parcelado adicionado ao filtro -->
             <select id="filtroTipo">
                 <option value="">Todos os tipos</option>
                 <option value="fixa">Fixa</option>
                 <option value="variavel">Variável</option>
+                <option value="parcelado">Parcelado</option>
             </select>
 
             <input type="month" id="filtroMes" />
@@ -165,7 +169,7 @@
     </section>
 
     <!-- TABELA DE DESPESAS -->
-    <section class="despesas">
+    <section class="despesas" id="tabela-despesas-section">
         <h2>Minhas Despesas</h2>
         <p id="mensagem-vazia">Suas despesas registradas aparecerão aqui.</p>
 
@@ -193,8 +197,8 @@
     </section>
 
     <script src="/static/js/despesas.js"></script>
-    <script src="/static/js/orcamento.js"></script>
     <script src="/static/js/despesas2.js"></script>
+    <script src="/static/js/orcamento.js"></script>
     <script src="/static/js/relatorio.js"></script>
     <script src="/static/js/recurrence.js"></script>
 

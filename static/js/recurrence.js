@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ─── Listener do evento disparado pelo despesas.js ───────
-    document.addEventListener("despesaAtualizada", async () => {
+    document.addEventListener("despesaAtualizada", async (event) => {
         const pendente = formDespesa.dataset.recorrenciaPendente;
         if (!pendente) return;
 
@@ -110,20 +110,15 @@ document.addEventListener("DOMContentLoaded", () => {
         try { payload = JSON.parse(pendente); }
         catch { return; }
 
-        // ✅ CORREÇÃO — a lista vem ordenada por data DESC (mais recente primeiro),
-        // então despesas[0] é a despesa recém-salva, não despesas[despesas.length - 1].
-        try {
-            const resDespesas = await fetch("/despesas/");
-            if (!resDespesas.ok) throw new Error("Erro ao buscar despesas.");
-            const despesas = await resDespesas.json();
-            if (!despesas.length) return;
-
-            payload.despesa_id = despesas[0].id;
-
-        } catch (err) {
-            console.error("Recorrência: não foi possível obter o ID da despesa.", err);
+        // ✅ CORREÇÃO — lê o ID diretamente do evento disparado pelo despesas.js
+        // (event.detail.despesaId), eliminando o segundo GET /despesas/ que
+        // causava o bug de vincular a recorrência à despesa parcelada de mesmo índice.
+        const despesaId = event?.detail?.despesaId;
+        if (!despesaId) {
+            console.error("Recorrência: ID da despesa não encontrado no evento.");
             return;
         }
+        payload.despesa_id = despesaId;
 
         // Envia a recorrência para o back-end
         try {

@@ -22,8 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
             : "";
 
     const renderizarBadgeTipo = (tipo) => {
-        if (tipo === "fixa") return `<span class="badge-tipo badge-fixa">Fixa</span>`;
-        if (tipo === "variavel") return `<span class="badge-tipo badge-variavel">Variável</span>`;
+        if (tipo === "fixa")      return `<span class="badge-tipo badge-fixa">Fixa</span>`;
+        if (tipo === "variavel")  return `<span class="badge-tipo badge-variavel">Variável</span>`;
+        if (tipo === "parcelado") return `<span class="badge-tipo badge-parcelado">💳 Parcelado</span>`;
         return `<span>—</span>`;
     };
 
@@ -42,19 +43,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const [ano, mes, dia] = despesa.data.split('-');
                 const dataFormatada = `${dia}/${mes}/${ano}`;
 
-                // ✅ CORREÇÃO — grava o ID do backend direto na linha.
-                // O despesas2.js lê tr.dataset.id para DELETE e PATCH.
-                // Sem isso, o fetch nunca recebe um ID válido.
                 novaLinha.dataset.id = despesa.id;
 
-                // ✅ CORREÇÃO — cada <td> tem data-col com o nome do campo.
-                // O despesas2.js usa td[data-col="x"] em vez de tds[índice].
-                // Isso torna o código imune a qualquer reordenação de colunas.
                 novaLinha.innerHTML = `
                     <td data-col="categoria">${despesa.categoria}</td>
                     <td data-col="descricao">${despesa.descricao}</td>
                     <td data-col="valor">R$ ${parseFloat(despesa.valor).toFixed(2).replace('.', ',')}</td>
-                    <td data-col="tipo">${renderizarBadgeTipo(despesa.tipo)}</td>
+                    <td data-col="tipo" data-value="${despesa.tipo}">${renderizarBadgeTipo(despesa.tipo)}</td>
                     <td data-col="data">${dataFormatada}</td>
                 `;
 
@@ -150,10 +145,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(erro.erro || 'Erro ao cadastrar despesa.');
             }
 
+            const novaDespesa = await response.json();
+
             await buscarDespesas();
             form.reset();
 
-            document.dispatchEvent(new CustomEvent("despesaAtualizada"));
+            // ✅ CORREÇÃO — passa o ID da despesa recém-criada no evento,
+            // eliminando a necessidade do recurrence.js fazer um segundo GET /despesas/
+            // e evitando o bug de pegar o ID errado quando há despesas parceladas.
+            document.dispatchEvent(new CustomEvent("despesaAtualizada", {
+                detail: { despesaId: novaDespesa.id }
+            }));
 
         } catch (error) {
             console.error(error);

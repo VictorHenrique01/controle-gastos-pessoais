@@ -24,13 +24,9 @@
   const thead = tabela.querySelector("thead tr");
   const tfoot = tabela.querySelector("tfoot tr");
 
-  // Lê o innerText bruto da célula
   const getCol = (tr, colName) =>
     tr.querySelector(`td[data-col="${colName}"]`)?.innerText.trim() ?? "";
 
-  // ✅ CORREÇÃO — lê data-value da célula (valor bruto do enum gravado pelo despesas.js)
-  // Fallback: normaliza o innerText para lowercase sem acentos caso data-value não exista.
-  // Isso resolve o problema de categoria/tipo aparecendo vazio no painel de edição.
   const getColValue = (tr, colName) => {
     const td = tr.querySelector(`td[data-col="${colName}"]`);
     if (!td) return "";
@@ -152,6 +148,7 @@
           <select id="editar-tipo">
             <option value="fixa">Fixa</option>
             <option value="variavel">Variável</option>
+            <option value="parcelado">Parcelado</option>
           </select>
         </label>
 
@@ -239,7 +236,6 @@
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        // ✅ CORREÇÃO — lê body.erro antes de body.message (padrão do back-end)
         throw new Error(body.erro || body.message || `Erro HTTP ${res.status}`);
       }
 
@@ -266,8 +262,6 @@
     currentEditingRow = tr;
     currentEditingId  = id;
 
-    // ✅ CORREÇÃO — getColValue retorna o valor do enum ("fixa", "alimentacao")
-    // em vez do innerText do badge ("Fixa", "Alimentação"), evitando select em branco
     q("#editar-categoria").value = getColValue(tr, "categoria");
     q("#editar-tipo").value      = getColValue(tr, "tipo");
     q("#editar-descricao").value = getCol(tr, "descricao");
@@ -309,7 +303,6 @@
     const valor     = parseFloat(q("#editar-valor").value);
     const data      = q("#editar-data").value;
 
-    // ✅ CORREÇÃO — valida categoria e tipo além dos outros campos
     if (!categoria || !tipo || !descricao || isNaN(valor) || !data) {
       const erroEl = q("#edicao-erro");
       erroEl.textContent = "Preencha todos os campos corretamente.";
@@ -327,7 +320,6 @@
       });
 
       if (!res.ok) {
-        // ✅ CORREÇÃO — lê body.erro (padrão do back-end Python) antes de body.message
         const body = await res.json().catch(() => ({}));
         throw new Error(body.erro || body.message || `Erro HTTP ${res.status} — verifique os campos e tente novamente.`);
       }

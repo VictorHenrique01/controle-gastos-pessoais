@@ -340,6 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="card-acoes">
                 <button class="btn-card-acao btn-editar-card" data-id="${compra.id}">Editar</button>
                 <button class="btn-card-acao btn-cancelar-card" data-id="${compra.id}">Cancelar</button>
+                <a href="/pagina_inicial#tabela-despesas-section" class="btn-card-acao btn-ver-despesas">📋 Ver despesas</a>
             </div>` : ""}
         `;
 
