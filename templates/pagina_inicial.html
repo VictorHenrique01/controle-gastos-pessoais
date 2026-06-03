@@ -18,15 +18,18 @@
 
             {% if session.get('usuario_id') %}
 
-                <!-- Usuário LOGADO: esconde cadastro/login, mostra os dois destinos -->
+                <!-- Usuário LOGADO: esconde cadastro/login, mostra os destinos -->
                 <p class="bem-vindo">Bem-vindo, <strong>{{ session.get('usuario_nome', 'Usuário') }}</strong>!</p>
 
                 <div class="buttons-logado">
                     <a href="/pagina_inicial" class="btn btn-primary">
-                         Controlar Despesas
+                        💰 Controlar Despesas
                     </a>
                     <a href="/cartao/" class="btn btn-cartao">
-                         Meus Parcelamentos
+                        💳 Meus Parcelamentos
+                    </a>
+                    <a href="/metas/" class="btn btn-metas">
+                        🎯 Metas Financeiras
                     </a>
                 </div>
 

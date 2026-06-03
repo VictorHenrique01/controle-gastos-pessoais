@@ -25,8 +25,19 @@ def pagina_metas():
 
 
 # ─── CRUD de metas ───────────────────────────────────────────────────────────
+# ✅ CORREÇÃO — endpoints de API movidos para /api/ para evitar conflito
+# com a rota GET / que renderiza o HTML da página.
 
-@meta_bp.route("/", methods=["POST"])
+@meta_bp.route("/api/", methods=["GET"])
+def listar_metas():
+    if "usuario_id" not in session:
+        return jsonify({"erro": "Acesso não autorizado"}), 401
+
+    metas = obter_metas_por_usuario(session["usuario_id"])
+    return jsonify(metas)
+
+
+@meta_bp.route("/api/", methods=["POST"])
 def criar_meta():
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -55,16 +66,7 @@ def criar_meta():
         return jsonify({"erro": "Erro interno ao criar meta."}), 500
 
 
-@meta_bp.route("/", methods=["GET"])
-def listar_metas():
-    if "usuario_id" not in session:
-        return jsonify({"erro": "Acesso não autorizado"}), 401
-
-    metas = obter_metas_por_usuario(session["usuario_id"])
-    return jsonify(metas)
-
-
-@meta_bp.route("/<int:meta_id>", methods=["GET"])
+@meta_bp.route("/api/<int:meta_id>", methods=["GET"])
 def obter_meta(meta_id):
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -76,7 +78,7 @@ def obter_meta(meta_id):
     return jsonify(meta.to_dict())
 
 
-@meta_bp.route("/<int:meta_id>", methods=["PATCH"])
+@meta_bp.route("/api/<int:meta_id>", methods=["PATCH"])
 def editar_meta(meta_id):
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -107,7 +109,7 @@ def editar_meta(meta_id):
         return jsonify({"erro": "Erro interno ao editar meta."}), 500
 
 
-@meta_bp.route("/<int:meta_id>", methods=["DELETE"])
+@meta_bp.route("/api/<int:meta_id>", methods=["DELETE"])
 def excluir_meta(meta_id):
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -124,7 +126,7 @@ def excluir_meta(meta_id):
 
 # ─── Aportes ─────────────────────────────────────────────────────────────────
 
-@meta_bp.route("/<int:meta_id>/aportes", methods=["POST"])
+@meta_bp.route("/api/<int:meta_id>/aportes", methods=["POST"])
 def fazer_aporte(meta_id):
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401
@@ -155,7 +157,7 @@ def fazer_aporte(meta_id):
 
 # ─── Histórico ───────────────────────────────────────────────────────────────
 
-@meta_bp.route("/<int:meta_id>/historico", methods=["GET"])
+@meta_bp.route("/api/<int:meta_id>/historico", methods=["GET"])
 def ver_historico(meta_id):
     if "usuario_id" not in session:
         return jsonify({"erro": "Acesso não autorizado"}), 401

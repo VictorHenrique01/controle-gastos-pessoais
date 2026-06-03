@@ -139,6 +139,25 @@ body {
     box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
 }
 
+.btn-metas {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    background-color: #059669;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.btn-metas:hover {
+    background-color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+}
+
 .link-sair {
     margin-top: 20px;
     font-size: 0.85rem;
