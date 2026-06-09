@@ -5,3 +5,4 @@ gunicorn
 werkzeug
 Flask-Migrate
 cryptography
+python-dateutil

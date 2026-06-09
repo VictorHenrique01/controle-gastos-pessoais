@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metas Financeiras — Controle de Gastos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/metas.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="topnav">
+        <a href="/" class="nav-back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Início
+        </a>
+        <span class="nav-title">Metas Financeiras</span>
+        <button id="btnNovaMeta" class="btn-nova-meta">+ Nova meta</button>
+    </nav>
+
+    <!-- CARDS DE RESUMO -->
+    <section class="resumo-cards">
+        <div class="card-resumo card-roxo">
+            <div class="card-resumo-top">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span class="card-badge" id="badgeMetasAtivas">0 ativas</span>
+            </div>
+            <div class="card-resumo-valor" id="totalMetasAtivas">0</div>
+            <div class="card-resumo-label">Metas em andamento</div>
+        </div>
+
+        <div class="card-resumo card-azul">
+            <div class="card-resumo-top">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <span class="card-badge">Objetivo total</span>
+            </div>
+            <div class="card-resumo-valor" id="totalObjetivo">R$ 0,00</div>
+            <div class="card-resumo-label">Soma de todas as metas ativas</div>
+        </div>
+
+        <div class="card-resumo card-verde">
+            <div class="card-resumo-top">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                </svg>
+                <span class="card-badge">Acumulado total</span>
+            </div>
+            <div class="card-resumo-valor" id="totalAcumulado">R$ 0,00</div>
+            <div class="card-resumo-label">Total já economizado</div>
+        </div>
+    </section>
+
+    <!-- FILTRO DE STATUS -->
+    <section class="metas-section">
+        <div class="section-header">
+            <h2>Minhas Metas</h2>
+            <div class="filtro-status">
+                <button class="btn-filtro ativo" data-status="">Todas</button>
+                <button class="btn-filtro" data-status="ativa">Ativas</button>
+                <button class="btn-filtro" data-status="concluida">Concluídas</button>
+                <button class="btn-filtro" data-status="cancelada">Canceladas</button>
+            </div>
+        </div>
+
+        <div id="lista-metas" class="lista-cards">
+            <!-- Cards gerados via JS -->
+        </div>
+
+        <p id="msg-vazia" class="msg-vazia">
+            Nenhuma meta encontrada. Clique em <strong>+ Nova meta</strong> para começar.
+        </p>
+    </section>
+
+    <!-- MODAL: NOVA / EDITAR META -->
+    <div id="modal-meta" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-meta-titulo">Nova meta</h3>
+                <button id="btnFecharModalMeta" class="btn-fechar">✕</button>
+            </div>
+            <form id="form-meta" novalidate>
+                <div class="form-group">
+                    <label for="m-titulo">Título</label>
+                    <input type="text" id="m-titulo" placeholder="Ex: Viagem para Europa, Reserva de emergência..." required>
+                </div>
+                <div class="form-group">
+                    <label for="m-descricao">Descrição (opcional)</label>
+                    <input type="text" id="m-descricao" placeholder="Detalhes sobre a meta...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="m-valor-objetivo">Valor objetivo (R$)</label>
+                        <input type="number" id="m-valor-objetivo" placeholder="0,00" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="m-valor-acumulado">Já economizado (R$)</label>
+                        <input type="number" id="m-valor-acumulado" placeholder="0,00" step="0.01" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="m-data-inicio">Data de início</label>
+                        <input type="date" id="m-data-inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="m-data-prazo">Data prazo</label>
+                        <input type="date" id="m-data-prazo" required>
+                    </div>
+                </div>
+                <p id="meta-form-erro" class="form-erro hidden"></p>
+                <div class="form-acoes">
+                    <button type="button" id="btnCancelarModalMeta" class="btn-secundario">Cancelar</button>
+                    <button type="submit" class="btn-primario">Salvar meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: APORTE -->
+    <div id="modal-aporte" class="modal-overlay hidden">
+        <div class="modal-box modal-box-sm">
+            <div class="modal-header">
+                <h3>Registrar aporte</h3>
+                <button id="btnFecharModalAporte" class="btn-fechar">✕</button>
+            </div>
+            <form id="form-aporte" novalidate>
+                <div class="form-group">
+                    <label for="a-valor">Valor (R$)</label>
+                    <input type="number" id="a-valor" placeholder="0,00" step="0.01" required>
+                    <span class="form-hint">Use valor negativo para corrigir/estornar</span>
+                </div>
+                <div class="form-group">
+                    <label for="a-descricao">Descrição (opcional)</label>
+                    <input type="text" id="a-descricao" placeholder="Ex: Salário de maio...">
+                </div>
+                <p id="aporte-form-erro" class="form-erro hidden"></p>
+                <div class="form-acoes">
+                    <button type="button" id="btnCancelarModalAporte" class="btn-secundario">Cancelar</button>
+                    <button type="submit" class="btn-primario">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: HISTÓRICO -->
+    <div id="modal-historico" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-historico-titulo">Histórico</h3>
+                <button id="btnFecharModalHistorico" class="btn-fechar">✕</button>
+            </div>
+            <div id="historico-lista" class="historico-lista">
+                <p class="historico-vazio">Nenhum aporte registrado ainda.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/metas.js"></script>
+
+</body>
+</html>

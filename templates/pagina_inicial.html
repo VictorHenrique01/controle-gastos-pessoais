@@ -8,22 +8,55 @@
 </head>
 <body>
     <div class="container">
-        <!-- img -->
         <div class="image-side">
-            <img src="/src/finance.png" alt="Controle de Gastos">
+            <img src="/static/img/finance.png" alt="Controle de Gastos">
         </div>
 
-        <!-- conteúdo -->
         <div class="content-side">
             <h1>Controle de Gastos</h1>
             <p>Organize seu dinheiro, conquiste seus objetivos.</p>
 
-            <div class="buttons">
-                <a href="/templates/cadastro_usuario.html" class="btn btn-primary">Cadastrar-se</a>
-                <a href="/templates/login.html" class="btn btn-secondary">Entrar</a>
-            </div>
+            {% if session.get('usuario_id') %}
+
+                <!-- Usuário LOGADO: esconde cadastro/login, mostra os destinos -->
+                <p class="bem-vindo">Bem-vindo, <strong>{{ session.get('usuario_nome', 'Usuário') }}</strong>!</p>
+
+                <div class="buttons-logado">
+                    <a href="/pagina_inicial" class="btn btn-primary">
+                        💰 Controlar Despesas
+                    </a>
+                    <a href="/cartao/" class="btn btn-cartao">
+                        💳 Meus Parcelamentos
+                    </a>
+                    <a href="/metas/" class="btn btn-metas">
+                        🎯 Metas Financeiras
+                    </a>
+                </div>
+
+                <a href="#" id="btnSair" class="link-sair">Sair da conta</a>
+
+            {% else %}
+
+                <!-- Usuário NÃO logado: só cadastro e login -->
+                <div class="buttons">
+                    <a href="/usuarios/cadastro" class="btn btn-primary">Cadastrar-se</a>
+                    <a href="/usuarios/login" class="btn btn-secondary">Entrar</a>
+                </div>
+
+            {% endif %}
         </div>
     </div>
-    </div>
+
+    {% if session.get('usuario_id') %}
+    <script>
+        document.getElementById("btnSair").addEventListener("click", async (e) => {
+            e.preventDefault();
+            await fetch("/usuarios/logout", { method: "POST" });
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "/";
+        });
+    </script>
+    {% endif %}
+
 </body>
 </html>

@@ -28,14 +28,18 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const resultado = await response.json();
-       if (response.ok) {
+
+            if (response.ok) {
                 // Se o login for bem-sucedido
-                mensagem.textContent = resultado.mensagem;
+                mensagem.textContent = resultado.mensagem || "Login realizado com sucesso!";
                 mensagem.style.color = "green";
-                
+
+                // Armazena no localStorage que o usuário está logado
+                localStorage.setItem("usuarioLogado", "true");
+
                 // Redireciona o usuário para a página principal após 1 segundo
                 setTimeout(() => {
-                    window.location.href = "/pagina_inicial"; // Altere se o nome da sua página principal for outro
+                    window.location.href = "/";
                 }, 1000);
 
             } else {
@@ -48,6 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Erro na requisição:", error);
             mensagem.textContent = "Não foi possível conectar ao servidor. Tente novamente mais tarde.";
             mensagem.style.color = "red";
-        }
-    });
+        }
+    });
 });

@@ -8,10 +8,101 @@ body {
     overflow: hidden;
     position: relative;
     height: 100vh;
-    background: url("/static/image/finance_background.png") no-repeat center center/cover;
+    background: url("/static/img/finance_background.png") no-repeat center center/cover;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* ====== CONTROLE DO USUÁRIO (Perfil + Logout) ====== */
+.user-controls {
+    position: absolute;
+    top: 25px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+}
+
+/* ======== NAVBAR DESPESAS ======== */
+.despesas-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(10, 15, 30, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.despesas-nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: color 0.15s;
+}
+.despesas-nav-back:hover { color: #fff; }
+
+.despesas-nav-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.01em;
+}
+
+.despesas-nav-acoes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.despesas-nav-btn {
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.despesas-nav-cartao {
+    background: rgba(124, 58, 237, 0.85);
+    color: #fff;
+}
+.despesas-nav-cartao:hover {
+    background: rgba(109, 40, 217, 1);
+}
+
+.despesas-nav-sair {
+    background: transparent;
+    color: #e0e0e0;
+    border: 1.5px solid rgba(0, 191, 255, 0.5);
+}
+.despesas-nav-sair:hover {
+    background: #ff4d4d;
+    border-color: #ff4d4d;
+    color: #fff;
+}
+
+/* Empurra o hero para baixo para não ficar atrás da navbar fixa */
+.hero {
+    padding-top: 56px;
 }
 
 .overlay {
@@ -293,3 +384,4 @@ tfoot td {
     font-weight: bold;
     background-color: #f5f5f5;
 }
+

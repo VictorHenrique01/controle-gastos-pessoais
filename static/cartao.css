@@ -1,0 +1,551 @@
+/* /static/cartao.css */
+
+:root {
+    --azul:      #2563eb;
+    --azul-dark: #1d4ed8;
+    --roxo:      #7c3aed;
+    --roxo-dark: #6d28d9;
+    --verde:     #059669;
+    --verde-dark:#047857;
+    --bg:        #f1f5f9;
+    --surface:   #ffffff;
+    --border:    #e2e8f0;
+    --text-main: #0f172a;
+    --text-sub:  #64748b;
+    --text-hint: #94a3b8;
+    --danger:    #dc2626;
+    --radius:    14px;
+    --shadow:    0 2px 12px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+/* ── NAV ─────────────────────────────── */
+.topnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--azul);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: opacity 0.15s;
+}
+.nav-back:hover { opacity: 0.75; }
+
+.nav-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+}
+
+.btn-nova-compra {
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.btn-nova-compra:hover  { background: var(--azul-dark); }
+.btn-nova-compra:active { transform: scale(0.97); }
+
+/* ── CARDS DE RESUMO ─────────────────── */
+.resumo-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 28px 28px 0;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.card-resumo {
+    border-radius: var(--radius);
+    padding: 22px 24px 20px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeUp 0.4s ease both;
+}
+
+.card-azul  { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
+.card-roxo  { background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); }
+.card-verde { background: linear-gradient(135deg, #059669 0%, #0284c7 100%); }
+
+.card-resumo-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.card-resumo-valor {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.card-resumo-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+/* ── SEÇÃO DE PARCELAMENTOS ──────────── */
+.parcelamentos-section {
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 28px 48px;
+}
+
+.section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.section-count {
+    font-size: 0.8rem;
+    color: var(--text-hint);
+    font-weight: 500;
+}
+
+/* ── LISTA DE CARDS ──────────────────── */
+.lista-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+/* ── CARD DE PARCELAMENTO ────────────── */
+.card-parcela {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.35s ease both;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.card-parcela:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.card-parcela-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.card-parcela-nome {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.badge-parcela {
+    background: #eff6ff;
+    color: var(--azul);
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.badge-quitado {
+    background: #f0fdf4;
+    color: var(--verde);
+    border-color: #bbf7d0;
+}
+
+.card-parcela-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-hint);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.info-item span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.info-item span.destaque {
+    font-size: 1.15rem;
+    color: var(--azul);
+}
+
+/* Countdown */
+.card-vencimento {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+}
+
+.card-vencimento svg { flex-shrink: 0; }
+
+.vence-urgente { color: var(--danger); font-weight: 600; }
+.vence-ok      { color: var(--verde);  font-weight: 500; }
+
+/* Barra de progresso das parcelas */
+.progresso-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.progresso-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-hint);
+}
+
+.progresso-bar {
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progresso-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--azul), var(--roxo));
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+
+/* Ações do card */
+.card-acoes {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 2px;
+}
+
+.btn-card-acao {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-editar-card {
+    background: #f1f5f9;
+    color: var(--text-sub);
+}
+.btn-editar-card:hover { background: #e2e8f0; color: var(--text-main); }
+
+.btn-cancelar-card {
+    background: #fff0f0;
+    color: var(--danger);
+}
+.btn-cancelar-card:hover { background: #fee2e2; }
+
+/* Msg vazia */
+.msg-vazia {
+    text-align: center;
+    color: var(--text-hint);
+    font-size: 0.9rem;
+    padding: 48px 0;
+    display: none;
+}
+.msg-vazia.visivel { display: block; }
+
+/* ── MODAL ───────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-box {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s ease;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.modal-header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.btn-fechar {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.btn-fechar:hover { background: #e2e8f0; }
+
+/* Form */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 14px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-sub);
+    letter-spacing: 0.02em;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background: #f8fafc;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--azul);
+    background: #fff;
+}
+
+.form-hint {
+    font-size: 0.72rem;
+    color: var(--text-hint);
+}
+
+/* Preview de parcelas */
+.fc-preview {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fc-preview.hidden { display: none; }
+
+.fc-preview-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.fc-preview-valor {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--azul-dark);
+}
+
+.form-erro {
+    color: var(--danger);
+    font-size: 0.82rem;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #fff0f0;
+    border-radius: 6px;
+    border-left: 3px solid var(--danger);
+}
+.form-erro.hidden { display: none; }
+
+.form-acoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.btn-primario {
+    flex: 1;
+    padding: 11px;
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-primario:hover { background: var(--azul-dark); }
+
+.btn-secundario {
+    padding: 11px 20px;
+    background: #f1f5f9;
+    color: var(--text-sub);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-secundario:hover { background: #e2e8f0; }
+
+.btn-ver-despesas {
+    text-align: center;
+    text-decoration: none;
+    background: #f0fdf4;
+    color: #059669;
+    border: 1px solid #bbf7d0;
+}
+.btn-ver-despesas:hover {
+    background: #dcfce7;
+}
+
+/* ── ANIMAÇÕES ───────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVO ──────────────────────── */
+@media (max-width: 768px) {
+    .resumo-cards {
+        grid-template-columns: 1fr;
+        padding: 16px 16px 0;
+    }
+
+    .parcelamentos-section {
+        padding: 20px 16px 48px;
+    }
+
+    .topnav {
+        padding: 14px 16px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .lista-cards {
+        grid-template-columns: 1fr;
+    }
+}

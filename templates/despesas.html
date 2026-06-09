@@ -4,8 +4,29 @@
     <meta charset="UTF-8">
     <title>Controle de Despesas</title>
     <link rel="stylesheet" href="/static/despesa.css">
+    <link rel="stylesheet" href="/static/despesa2.css">
 </head>
 <body>
+
+    <!-- NAVBAR -->
+    <nav class="despesas-nav">
+        <a href="/" class="despesas-nav-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Início
+        </a>
+        <span class="despesas-nav-title">Controle de Despesas</span>
+        <div class="despesas-nav-acoes">
+            <a href="/cartao/" class="despesas-nav-btn despesas-nav-cartao">
+                💳 Parcelamentos
+            </a>
+            <button id="btnLogout" class="despesas-nav-btn despesas-nav-sair">
+                Sair
+            </button>
+        </div>
+    </nav>
+
     <div class="hero">
         <div class="overlay"></div>
         <div class="content">
@@ -55,8 +76,56 @@
                     <label for="descricao">Descrição:</label>
                     <input type="text" id="descricao" name="descricao" placeholder="Ex: Conta de luz">
 
+                    <!-- ✅ Parcelado adicionado — permite editar manualmente se necessário -->
+                    <label for="tipo">Tipo de Despesa:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Selecione</option>
+                        <option value="fixa">Fixa</option>
+                        <option value="variavel">Variável</option>
+                        <option value="parcelado">Parcelado</option>
+                    </select>
+
                     <label for="data">Data:</label>
                     <input type="date" id="data" name="data" required>
+
+                    <!-- RECORRÊNCIA -->
+                    <div class="recorrencia-toggle">
+                        <input type="checkbox" id="checkRecorrente" />
+                        <label for="checkRecorrente">Esta é uma despesa recorrente</label>
+                    </div>
+
+                    <div id="recorrencia-box" class="hidden">
+                        <div class="recorrencia-card">
+
+                            <div>
+                                <label for="recFrequencia">Frequência:</label>
+                                <select id="recFrequencia">
+                                    <option value="">Selecione</option>
+                                    <option value="semanal">Semanal (a cada 7 dias)</option>
+                                    <option value="mensal">Mensal</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="recDataInicio">Data de início:</label>
+                                <input type="date" id="recDataInicio" />
+                            </div>
+
+                            <div class="rec-opcional">
+                                <label for="recDataFim">Data de término (opcional):</label>
+                                <input type="date" id="recDataFim" />
+                                <span class="rec-hint">Deixe em branco para repetir indefinidamente</span>
+                            </div>
+
+                            <div id="recPreview" class="hidden">
+                                <h4>Próximas ocorrências</h4>
+                                <ul id="recPreviewLista"></ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- FIM RECORRÊNCIA -->
 
                     <button type="submit">Salvar</button>
                 </form>
@@ -70,30 +139,37 @@
         </path>
     </svg>
 
-     <!-- FILTRO E BUSCA -->
-<section class="filtros">
-    <h3>Filtrar e Buscar Despesas</h3>
+    <!-- FILTRO E BUSCA -->
+    <section class="filtros">
+        <h3>Filtrar e Buscar Despesas</h3>
 
-    <div class="filtro-container">
-        <input type="text" id="buscaDescricao" placeholder="Buscar por descrição..." />
+        <div class="filtro-container">
+            <input type="text" id="buscaDescricao" placeholder="Buscar por descrição..." />
 
-        <select id="filtroCategoria">
-            <option value="">Todas as categorias</option>
-            <option value="alimentacao">Alimentação</option>
-            <option value="transporte">Transporte</option>
-            <option value="lazer">Lazer</option>
-            <option value="moradia">Moradia</option>
-            <option value="outros">Outros</option>
-        </select>
+            <select id="filtroCategoria">
+                <option value="">Todas as categorias</option>
+                <option value="alimentacao">Alimentação</option>
+                <option value="transporte">Transporte</option>
+                <option value="lazer">Lazer</option>
+                <option value="moradia">Moradia</option>
+                <option value="outros">Outros</option>
+            </select>
 
-        <input type="month" id="filtroMes" />
-        <button id="limparFiltros">Limpar</button>
-    </div>
-</section>
+            <!-- ✅ Parcelado adicionado ao filtro -->
+            <select id="filtroTipo">
+                <option value="">Todos os tipos</option>
+                <option value="fixa">Fixa</option>
+                <option value="variavel">Variável</option>
+                <option value="parcelado">Parcelado</option>
+            </select>
 
+            <input type="month" id="filtroMes" />
+            <button id="limparFiltros">Limpar</button>
+        </div>
+    </section>
 
     <!-- TABELA DE DESPESAS -->
-    <section class="despesas">
+    <section class="despesas" id="tabela-despesas-section">
         <h2>Minhas Despesas</h2>
         <p id="mensagem-vazia">Suas despesas registradas aparecerão aqui.</p>
 
@@ -103,6 +179,7 @@
                     <th>Categoria</th>
                     <th>Descrição</th>
                     <th>Valor (R$)</th>
+                    <th>Tipo</th>
                     <th>Data</th>
                 </tr>
             </thead>
@@ -111,7 +188,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="2"><strong>Total:</strong></td>
+                    <td colspan="3"><strong>Total:</strong></td>
                     <td id="valorTotalTabela"><strong>R$ 0,00</strong></td>
                     <td></td>
                 </tr>
@@ -119,9 +196,19 @@
         </table>
     </section>
 
-
     <script src="/static/js/despesas.js"></script>
+    <script src="/static/js/despesas2.js"></script>
     <script src="/static/js/orcamento.js"></script>
+    <script src="/static/js/relatorio.js"></script>
+    <script src="/static/js/recurrence.js"></script>
+
+    <script>
+        document.getElementById("btnLogout").addEventListener("click", async () => {
+            await fetch("/usuarios/logout", { method: "POST" });
+            localStorage.removeItem("usuarioLogado");
+            window.location.href = "/";
+        });
+    </script>
 
 </body>
 </html>
